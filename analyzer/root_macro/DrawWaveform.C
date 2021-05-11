@@ -10,8 +10,8 @@ void DrawWaveform(const String& filename)
     TH2F histWFCh1("histWFCh1","histWFCh1",1024,0,1024,100,-100,100);
     TH2F histWFCh2("histWFCh2","histWFCh2",1024,0,1024,100,-100,100);
 
-    TH1F histSpCh1("histWFCh1","histWFCh1",100,0,100);
-    TH1F histSpCh2("histWFCh2","histWFCh2",100,0,100);
+    TH1F histSpCh1("histSPCh1","histSPCh1",100,0,100);
+    TH1F histSpCh2("histSPCh2","histSPCh2",100,0,100);
     
     String name = "";
     int ch1 = 0, ch2 = 0;
