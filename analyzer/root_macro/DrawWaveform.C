@@ -45,9 +45,9 @@ void DrawWaveform(const String& filename)
     hist.Draw("colz");
 
     String outname = ShUtil::ExtractPathWithoutExt( filename );
-    cvs.SaveAs( Form( "%s.png", outname ) );
-    cvs.SaveAs( Form( "%s.pdf", outname ) );
-    cvs.SaveAs( Form( "%s.eps", outname ) );
+    cvs.SaveAs( Form( "%s.png", outname.c_str() ) );
+    cvs.SaveAs( Form( "%s.pdf", outname.c_str() ) );
+    cvs.SaveAs( Form( "%s.eps", outname.c_str() ) );
 
     return;
 }
