@@ -1,28 +1,56 @@
-void DrawWaveform(const char* filename="Cs137_GAGG.root")
+#include "inc/shinclude.h"
+
+void DrawWaveform(const String& filename)
 {
+    SetShStyle();
 
-	TFile* file = new TFile(filename,"read");
-	TTree* tree = (TTree*)file->Get("tree");
-	double sampling[1024];
-	double wf[1024];
-	tree->SetBranchAddress("sample_time",sampling);
-	tree->SetBranchAddress("wf_ch1",wf);
+    std::ifstream ifs( filename );
+    if( ifs.is_open() == false ) return;
 
-	int entries = tree->GetEntries();
+    TH2F hist("hist","hist",1024,0,1024,100,-100,100);
 
-	TH2D* h_wf  = new TH2D("h_wf","h_wf",1024,0,1024/1e7*1e6,4092,-2500,2500);
+    String name = "";
+    int ch1 = 0, ch2 = 0;
+    int clock = 0;
+    while( !ifs.eof( ) ) {
+        String line = "";
+        std::getline( ifs, line );
+        if( line.length( ) <= 0 || strncmp( line.c_str( ), "#", 1 ) == 0 ) {
+            clock = 0;
+            continue;
+        }
+        std::stringstream ss( line );
+        ss >> name >> ch1 >> ch2;
 
+        hist.Fill(clock, ch1);
+        ++clock;
+    }
 
-	for(int ev=0;ev<entries;ev++){
-		tree->GetEntry(ev);
-		for(int samp=0;samp<1024;samp++){
-			h_wf->Fill(sampling[samp],wf[samp]);
-		}
-		//h_ene->Fill(area);
-	}
-	
-	h_wf->Draw("colz");
-	//g->Draw("ap");
+    TCanvas cvs("cvs","cvs",800,600);
 
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
 
+    Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+    Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 1.00 };
+    Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+    Double_t blue[NRGBs]  = { 0.80, 1.00, 0.12, 0.00, 0.00 };
+    TColor::CreateGradientColorTable( NRGBs, stops, red, green, blue, NCont );
+    gStyle->SetNumberContours( NCont );
+    gPad->SetRightMargin( 0.2 );
+
+    hist.GetXaxis()->SetTitle("clock [10 MHz sampling]");
+    hist.GetYaxis()->SetTitle("ADC count");
+    hist.GetZaxis()->SetTitle("Entries");
+    hist.Draw("colz");
+
+    String outname = ShUtil::ExtractPathWithoutExt( filename );
+    cvs.SaveAs( Form( "%s.png", outname ) );
+    cvs.SaveAs( Form( "%s.pdf", outname ) );
+    cvs.SaveAs( Form( "%s.eps", outname ) );
+
+    return;
 }
+
+
+
