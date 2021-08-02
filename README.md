@@ -40,7 +40,7 @@ $ make
 $ sudo make install
 ```
 
-## LOCAL INSTALATON
+## LOCAL INSTALATON (install path specific, not usually, optional)
 
 ```
 $ cd ~
@@ -54,17 +54,16 @@ $ make
 $ make install
 ```
 
-# DAQ
+## ADALM DAQ TOOL
 ```
-$ cd ${adalm_daq}
+$ git clone https://github.com/kobeDM/adalm.git
+$ cd adalm
 $ mkdir build
 $ cd build
 $ cmake ../source
 $ make install
 $ ls ../bin
-daq daq_test
-
-# if you don't want to test, remove daq_test line from CMakeLists.txt
+daq daq_test # if you don't want to test, remove daq_test line from CMakeLists.txt
 
 # FOR TEST
 $ cd ${adalm_daq}
