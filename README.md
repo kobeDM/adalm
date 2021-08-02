@@ -1,7 +1,7 @@
-# INSTALATION
-adalm daq installation
+# ADALM DAQ INSTALATION
 read this README.md or adalm_daq/README.md (old README.md)
 
+Installation flow : libiio and libini -> libm2k -> adalm daq 
 ## basic
 ```
 $sudo apt-get install git cmake swig g++ python3-dev python3-setuptools
