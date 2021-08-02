@@ -40,7 +40,7 @@ $ make
 $ sudo make install
 ```
 
-## LOCAL INSTALATON (install path specific, not usually, optional)
+### LOCAL INSTALATON (install path specific, not usually, optional)
 
 ```
 $ cd ~
