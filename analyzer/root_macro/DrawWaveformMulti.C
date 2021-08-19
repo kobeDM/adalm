@@ -1,13 +1,23 @@
 #include "inc/shinclude.h"
 
-void DrawWaveform(const String& filename, const String& outputDir )
+void DrawWaveformMulti( const String& filenameList, const String& outputDir )
 {
     SetShStyle();
     ShUtil::ExistCreateDir( outputDir );
+    
+    // retrieve filenames
+    std::list< String > fileList;
+    std::ifstream ifsList( filenameList );
+    if( ifsList.is_open( ) == false ) return;
+    while( !ifsList.eof( ) ) {
+        String filePath = "";
+        std::getline( ifsList, filePath );
+        if( ShUtil::ExistFile( filePath ) == false ) continue;
+        fileList.push_back( filePath );
+    }
+    
 
-    std::ifstream ifs( filename );
-    if( ifs.is_open() == false ) return;
-
+    // setup histogram
     TH2F histWFCh1("histWFCh1","histWFCh1",1024,0,1024,100,-100,100);
     TH2F histWFCh2("histWFCh2","histWFCh2",1024,0,1024,100,-100,100);
 
@@ -20,38 +30,45 @@ void DrawWaveform(const String& filename, const String& outputDir )
     int ch1Min = 1023, ch2Min = 1023;
     int ch1Max = -1024, ch2Max = -1024;
     int evtID = 0;
-    while( !ifs.eof( ) ) {
-        String line = "";
-        std::getline( ifs, line );
-        if( line.length( ) <= 0 || strncmp( line.c_str( ), "#", 1 ) == 0 ) {
-            if( evtID != 0 ) {
-                histSpCh1.Fill( ch1Max - ch1Min );
-                histSpCh2.Fill( ch2Max - ch2Min );
-            }
-            
-            ++evtID;
-            clock = 0;
-            ch1Min = 1023;
-            ch2Min = 1023;
-            ch1Max = -1024;
-            ch2Max = -1024;
-            continue;
-        }
-        std::stringstream ss( line );
-        ss >> ch1 >> ch2;
 
-        if     ( ch1 < ch1Min ) ch1Min = ch1;
-        else if( ch1 > ch1Max ) ch1Max = ch1;
-
-        if     ( ch2 < ch2Min ) ch2Min = ch2;
-        else if( ch2 > ch2Max ) ch2Max = ch2;
+    for( auto filePath : fileList ) {
+        ShUtil::Cinfo( Form( "loading %s ...", filePath.c_str( ) ) );
         
-        histWFCh1.Fill(clock, ch1);
-        histWFCh1.Fill(clock, ch2);
-        ++clock;
-    }
+        std::ifstream ifs( filePath );
+        if( ifs.is_open() == false ) return;
 
-    String outname = ShUtil::GetFileName(ShUtil::ExtractPathWithoutExt( filename ));
+        while( !ifs.eof( ) ) {
+            String line = "";
+            std::getline( ifs, line );
+            if( line.length( ) <= 0 || strncmp( line.c_str( ), "#", 1 ) == 0 ) {
+                if( evtID != 0 ) {
+                    histSpCh1.Fill( ch1Max - ch1Min );
+                    histSpCh2.Fill( ch2Max - ch2Min );
+                }
+            
+                ++evtID;
+                clock = 0;
+                ch1Min = 1023;
+                ch2Min = 1023;
+                ch1Max = -1024;
+                ch2Max = -1024;
+                continue;
+            }
+            std::stringstream ss( line );
+            ss >> ch1 >> ch2;
+
+            if     ( ch1 < ch1Min ) ch1Min = ch1;
+            else if( ch1 > ch1Max ) ch1Max = ch1;
+
+            if     ( ch2 < ch2Min ) ch2Min = ch2;
+            else if( ch2 > ch2Max ) ch2Max = ch2;
+        
+            histWFCh1.Fill(clock, ch1);
+            histWFCh1.Fill(clock, ch2);
+            ++clock;
+        }
+    }
+    String outname = ShUtil::GetFileName(ShUtil::ExtractPathWithoutExt( filenameList ));
     TCanvas cvs("cvs","cvs",800,600);
     
     histSpCh1.GetXaxis()->SetTitle("ADC count");
