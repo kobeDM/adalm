@@ -1,8 +1,9 @@
 #include "inc/shinclude.h"
 
-void DrawWaveform(const String& filename)
+void DrawWaveform(const String& filename, const String& outputDir )
 {
     SetShStyle();
+    ShUtil::ExistCreateDir( outputDir );
 
     std::ifstream ifs( filename );
     if( ifs.is_open() == false ) return;
@@ -13,7 +14,6 @@ void DrawWaveform(const String& filename)
     TH1F histSpCh1("histSPCh1","histSPCh1",100,0,100);
     TH1F histSpCh2("histSPCh2","histSPCh2",100,0,100);
     
-    String name = "";
     int ch1 = 0, ch2 = 0;
     int clock = 0;
 
@@ -38,7 +38,7 @@ void DrawWaveform(const String& filename)
             continue;
         }
         std::stringstream ss( line );
-        ss >> name >> ch1 >> ch2;
+        ss >> ch1 >> ch2;
 
         if     ( ch1 < ch1Min ) ch1Min = ch1;
         else if( ch1 > ch1Max ) ch1Max = ch1;
@@ -58,17 +58,17 @@ void DrawWaveform(const String& filename)
     histSpCh1.GetYaxis()->SetTitle("Entries");
     histSpCh1.Draw("colz");
     
-    cvs.SaveAs( Form( "%s_spch1.png", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_spch1.pdf", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_spch1.eps", outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_spch1.png", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_spch1.pdf", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_spch1.eps", outputDir.c_str( ), outname.c_str() ) );
 
     histSpCh2.GetXaxis()->SetTitle("ADC count");
     histSpCh2.GetYaxis()->SetTitle("Entries");
     histSpCh2.Draw("colz");
     
-    cvs.SaveAs( Form( "%s_spch2.png", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_spch2.pdf", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_spch2.eps", outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_spch2.png", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_spch2.pdf", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_spch2.eps", outputDir.c_str( ), outname.c_str() ) );
     
     const Int_t NRGBs = 5;
     const Int_t NCont = 255;
@@ -86,18 +86,18 @@ void DrawWaveform(const String& filename)
     histWFCh1.GetZaxis()->SetTitle("Entries");
     histWFCh1.Draw("colz");
     
-    cvs.SaveAs( Form( "%s_wfch1.png", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_wfch1.pdf", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_wfch1.eps", outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_wfch1.png", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_wfch1.pdf", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_wfch1.eps", outputDir.c_str( ), outname.c_str() ) );
 
     histWFCh2.GetXaxis()->SetTitle("clock [10 MHz sampling]");
     histWFCh2.GetYaxis()->SetTitle("ADC count");
     histWFCh2.GetZaxis()->SetTitle("Entries");
     histWFCh2.Draw("colz");
     
-    cvs.SaveAs( Form( "%s_wfch2.png", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_wfch2.pdf", outname.c_str() ) );
-    cvs.SaveAs( Form( "%s_wfch2.eps", outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_wfch2.png", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_wfch2.pdf", outputDir.c_str( ), outname.c_str() ) );
+    cvs.SaveAs( Form( "%s/%s_wfch2.eps", outputDir.c_str( ), outname.c_str() ) );
     
     return;
 }
