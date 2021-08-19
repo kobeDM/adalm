@@ -4,7 +4,7 @@ read this README.md or adalm_daq/README.md (old README.md)
 Installation flow : libiio and libini -> libm2k -> adalm daq 
 ## basic
 ```
-$sudo apt-get install git cmake swig g++ python3-dev python3-setuptools
+$sudo apt install git cmake swig g++ python3-dev python3-setuptools
 ```
 
 ## libiio and libini 
@@ -15,7 +15,7 @@ see! URL : https://wiki.analog.com/resources/tools-software/linux-software/libii
 # libini
 $ cd ~/
 $ mkdir tmp; cd tmp
-$ sudo apt-get install libaio-dev libusb-1.0-0-dev libserialport-dev libxml2-dev libavahi-client-dev doxygen graphviz
+$ sudo apt install libaio-dev libusb-1.0-0-dev libserialport-dev libxml2-dev libavahi-client-dev doxygen graphviz
 $ git clone https://github.com/pcercuei/libini.git
 $ cd libini
 $ mkdir build && cd build && cmake ../ && make && sudo make install
