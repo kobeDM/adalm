@@ -73,3 +73,7 @@ $ ../bin/daq_test out 100 1000000 1024 2 0.1 0.1 2 0
 $ ls
 out.dat out.cnf
 ```
+## ADALM OUTPUT SAMPLES
+ad_aout -1 100 0.5 200  #outputs -1V 100ns signal from out1 and 0.5V 200ns signal from out2
+ad_dout 500 # outputs 500ns differential digital clocks from D0-D8 D1-D9... D7-D15 for 3sec.
+
