@@ -76,7 +76,27 @@ out.dat out.cnf
 
 ## ADALM OUTPUT SAMPLES
 ```
-ad_aout -1 100 0.5 200  #outputs -1V 100ns signal from out1 and 0.5V 200ns signal from out2
-ad_dout 500 # outputs 500ns differential digital clocks from D0-D8 D1-D9... D7-D15 for 3sec.
+ad_out: ADALM2000 output sample program
+ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] 
+ex: ad_out -u usb:1.9.5 --T1 300 --V1 -0.7 --T2 1000 --V2 -1.5 
+         to output analog signals to CH1 (-0.7V 300ns) and CH2 (-1.5V 1000ns) connected to usb:1.9.5.
+ex: ad_out -d usb:1.9.5 --T1 300
+         to output digital signals to D0:D15 (300ns) connected to usb:1.9.5.
+ex: ad_out -s
+         to get the serial number of available adalm2000.
+ex: ad_out -s  -u usb:1.9.5
+         to get the serial number adalm2000 connected to usb:1.9.5.
+
+
+```
+## ADALM SCAN
+```
+getusbport.py : USB port scan for ADALM2000 devices   
+getusbport.py [S/N]
+
+ex ./getusbport.py 
+    to list the ADALM2000 devices  
+ex ./getusbport.py 10447384b904001612002500df1edb619310447384b904001612002500df1edb6193
+    to know the URI for 10447384b904001612002500df1edb619310447384b904001612002500df1edb6193
 ```
 
