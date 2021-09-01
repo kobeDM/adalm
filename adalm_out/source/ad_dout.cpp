@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <getopt.h>
 #include <sys/time.h>
 #include <math.h>
 #include <libm2k/m2k.hpp>
@@ -40,19 +41,83 @@ int main(int argc, char* argv[])
         //return -1;
   //}
 
-      printf("ADALM2000 digial I/O sample (D0-D7 pos, D8-D15 neg output 1MHz for 3 sec)  \n");
-    if(argc>1){
-      //    dch[i] = atof(argv[1+i*2]);
-    dT = atoi(argv[1]);
-  }
-    else{
-      printf("./adout [nsec (min. 160ns)]  \n");
-      printf("ex) ad_out 300 \n");
-      dT=500; //default 500ns
+  printf("ADALM2000 digial I/O sample (D0-D7 pos, D8-D15 neg output 500ns)  \n");
+  int sopt = 0;
+  int uopt = 0;
+  int dopt = 0;
+  //  char *cparam = NULL;
+  string URI;
+  char *dparam = NULL;
+  struct option longopts[] = {
+      { "SN",    no_argument,       NULL, 's' },
+      { "URI",  required_argument, NULL, 'u' },
+      { "delete", optional_argument, NULL, 'd' },
+      { 0,        0,                 0,     0  },
+  };
+  int opt;
+  int longindex;
+  int numopt=0;
+  while ((opt = getopt_long(argc, argv, "su:d::", longopts, &longindex)) != -1) {
+    //    printf("%d %s\n", longindex, longopts[longindex].name);
+    switch (opt) {
+    case 's':
+      sopt = 1;
+      numopt++;
+      //argc--;
+      break;
+    case 'u':
+      uopt = 1;
+      numopt+=2;
+      //cout <<"argc"<<argc<<endl;  
+      //      argc-=2;
+      //	cout <<"argc"<<argc<<endl;  
+      //        cparam = optarg;
+      //      cout <<"optarg:"<<optarg<<endl;
+      URI=optarg;
+      //cout <<"URI to read:"<<URI<<endl;
+      //
+      break;
+    case 'd':
+      dopt = 1;
+      numopt++;
+      dparam = optarg;
+      break;
+    default:
+      printf("error! \'%c\' \'%c\'\n", opt, optopt);
+      return 1;
     }
-    dclocks=((int)(dT*dfreq*1e-9))/4*4;
-    if(dclocks<16)dclocks=16;
-    printf("%dns (%d clocks)\n",dT,dclocks);
+  }
+  //  cout <<"argc"<<argc<<endl;  
+  argc-=numopt;
+  //cout <<"argc"<<argc<<endl;  
+  
+  if(sopt){
+    //printf("s = %d\n", sopt);
+    cout <<"SN check mode is selected."<<endl;
+  }
+  //  printf("b = %d\n", bopt);
+  if(uopt){
+    //printf("u = %d, %s\n", uopt, URI.c_str());
+  //  printf("c = %d, %s\n", uopt, cparam);
+    cout<<"URI to read:"<<URI<<endl;
+  }
+  //  printf("d = %d, %s\n", dopt, dparam);
+  //  for (int i = optind; i < argc; i++) {
+  //  printf("arg = %s\n", argv[i]);
+  // }
+
+  if(argc>1){
+    //    dch[i] = atof(argv[1+i*2]);
+    dT = atoi(argv[1+numopt]);
+  }
+  else{
+    printf("./ad_dout [-u || -URI device_URI] [-s || --SN] [nsec (min. 160ns)]  \n");
+    printf("ex) ad_dout 300 \n");
+    dT=500; //default 500ns
+  }
+  dclocks=((int)(dT*dfreq*1e-9))/4*4;
+  if(dclocks<16)dclocks=16;
+  printf("%dns (%d clocks)\n",dT,dclocks);
   
   //----------------------------
   //  configure
@@ -68,12 +133,38 @@ int main(int argc, char* argv[])
   **/
   //----------------------------
   //  Open ADALM2000
-  M2k *ctx = m2kOpen();
+  //  uopt=0;
+  M2k *ctx;//= m2kOpen();
+  ctx= m2kOpen();
   if (!ctx) {
     std::cout << "Connection Error: No ADALM2000 device available/connected to your PC." << std::endl;
     return 1;
   }
 
+
+  if(uopt){
+    //    M2k *ctx = m2kOpen(URI.c_str());
+    ctx = m2kOpen(URI.c_str());
+    if (!ctx) {
+      std::cout << "Connection Error: No ADALM2000 device available/connected to your PC." << std::endl;
+      return 1;
+      
+    }
+  }
+
+
+  
+  string SN=ctx->getSerialNumber();
+  //string
+  URI=ctx->getUri();
+  //  cout<<"serial number:"<<ctx->getSerialNumber()<<endl;
+  cout<<"URI:"<<URI<<endl;
+  cout<<"serial number:"<<SN<<endl;
+
+  if(sopt){
+    return 1;
+  }
+  
   M2kAnalogOut *aout = ctx->getAnalogOut();
   M2kDigital *dio = ctx->getDigital(); //for dio
   dio->setSampleRateOut(dfreq);
@@ -85,8 +176,8 @@ int main(int argc, char* argv[])
     dio->setDirection(i,DIO_DIRECTION(ddir));
     //	  dio->enableChannel(i,1);	  
   }
-  //  dio->setCyclic(false);
-  dio->setCyclic(true);
+    dio->setCyclic(false);
+  //dio->setCyclic(true);
   //      dio->enableAllOut(true);
   for (int i=0;i<8;i++){
   dio->setValueRaw(i,DIO_LEVEL(0));
@@ -98,7 +189,8 @@ int main(int argc, char* argv[])
   // }
   //	dio->setCyclic(true);
   //vector<unsigned short> bufferout;
-  unsigned short  ddata[1024];
+
+    unsigned short  ddata[1024];
   //	  unsigned short  ddata[128];
 	  //	  for(int i=0;i<2;i++)	 ddata.push_back(40);
 	  //for(int i=0;i<30;i++)	 ddata.push_back(1);
