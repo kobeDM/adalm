@@ -41,8 +41,9 @@ int main(int argc, char* argv[])
   //   if(argc<1){
         //return -1;
   //}
-  printf("./ad_dout [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] \n");
-  printf("ADALM2000 digial I/O sample (D0-D7 pos, D8-D15 neg output 500ns)  \n");
+  printf("ad_out: ADALM2000 output sample program\n");
+  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] \n");
+  int hopt = 0;
   int sopt = 0;
   int uopt = 0;
   int topt=0;
@@ -63,14 +64,19 @@ int main(int argc, char* argv[])
       { "V2",  required_argument, NULL, 'w' },
       { "URI",  required_argument, NULL, 'u' },
       { "DIGITAL", no_argument, NULL, 'd' },
+      { "help", no_argument, NULL, 'h' },
       { 0,        0,                 0,     0  },
   };
   int opt;
   int longindex;
   int numopt=0;
-  while ((opt = getopt_long(argc, argv, "adsu:t:v:r:w:", longopts, &longindex)) != -1) {
+  while ((opt = getopt_long(argc, argv, "hadsu:t:v:r:w:", longopts, &longindex)) != -1) {
     //    printf("%d %s\n", longindex, longopts[longindex].name);
     switch (opt) {
+    case 'h':
+      hopt = 1;
+      numopt++;
+      break;
     case 'a':
       aopt = 1;
       numopt++;
@@ -119,7 +125,17 @@ int main(int argc, char* argv[])
   }
   //  cout <<"argc"<<argc<<endl;  
     //cout <<"argc"<<argc<<endl;  
-  
+  if(hopt){
+    cout <<"ex: ad_out -u usb:1.9.5 --T1 300 --V1 -0.7 --T2 1000 --V2 -1.5 "<<endl;
+    cout <<"\t to output analog signals to CH1 (-0.7V 300ns) and CH2 (-1.5V 1000ns) connected to usb:1.9.5."<<endl;
+    cout <<"ex: ad_out -d usb:1.9.5 --T1 300"<<endl;
+    cout <<"\t to output digital signals to D0:D15 (300ns) connected to usb:1.9.5."<<endl;
+    cout <<"ex: ad_out -s"<<endl;
+    cout <<"\t to get the serial number of available adalm2000."<<endl;
+    cout <<"ex: ad_out -s  -u usb:1.9.5"<<endl;
+    cout <<"\t to get the serial number adalm2000 connected to usb:1.9.5."<<endl;
+    return 0;
+  } 
   if(aopt){
     cout <<"**** Analog output mode is selected. ****"<<endl;
     dopt=0;
