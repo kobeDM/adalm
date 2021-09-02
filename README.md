@@ -76,6 +76,14 @@ out.dat out.cnf
 
 ## ADALM OUTPUT SAMPLES
 ```
+# COMPLIE
+$ cd ${adalm_out}
+$ mkdir build
+$ cmake ../source
+$make
+$./ad_out
+
+# FOR TEST
 ad_out: ADALM2000 output sample program
 ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] 
 ex: ad_out -u usb:1.9.5 --T1 300 --V1 -0.7 --T2 1000 --V2 -1.5 
