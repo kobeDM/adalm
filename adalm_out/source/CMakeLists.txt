@@ -14,18 +14,21 @@ else()					# standalone build
 	find_package(libm2k REQUIRED)
 endif()
 
+add_executable(ad_out "ad_out.cpp")
 add_executable(ad_aout "ad_aout.cpp")
 add_executable(ad_dout "ad_dout.cpp")
 #add_executable(ad_out "ad_out.cpp")
 #add_executable(daq_test "daq_test.cpp")
 #add_executable(daq_sahigash "daq_sahigash.cpp")
 
+target_link_libraries(ad_out PRIVATE libm2k::libm2k)
 target_link_libraries(ad_dout PRIVATE libm2k::libm2k)
 target_link_libraries(ad_aout PRIVATE libm2k::libm2k)
 #target_link_libraries(daq_test PRIVATE libm2k::libm2k)
 #target_link_libraries(daq_sahigash PRIVATE libm2k::libm2k)
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/..)
+install(TARGETS ad_out DESTINATION bin)
 install(TARGETS ad_dout DESTINATION bin)
 install(TARGETS ad_aout DESTINATION bin)
 #install(TARGETS daq_test DESTINATION bin)
