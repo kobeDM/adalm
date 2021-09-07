@@ -262,44 +262,23 @@ int main(int argc, char* argv[])
   }
     dio->setCyclic(false);
   //dio->setCyclic(true);
-  //      dio->enableAllOut(true);
   for (int i=0;i<8;i++){
   dio->setValueRaw(i,DIO_LEVEL(0));
   dio->setValueRaw(i+8,DIO_LEVEL(1));
-    //dio->setValueRaw(i+8,DIO_LEVEL(0));
+  //dio->setValueRaw(i+8,DIO_LEVEL(0));
   }
-    dio->enableAllOut(true);
-  //  for (int i=8;i<15;i++){
-  // }
-  //	dio->setCyclic(true);
-  //vector<unsigned short> bufferout;
-
-    unsigned short  ddata[1024];
-  //	  unsigned short  ddata[128];
-	  //	  for(int i=0;i<2;i++)	 ddata.push_back(40);
-	  //for(int i=0;i<30;i++)	 ddata.push_back(1);
-	  //  for(int i=0;i<32;i++){
-	  // bufferout.push_back(i);
-	  // }
-	  for(int i=0;i<dclocks;i++){
+      unsigned short  ddata[1024];
+      for(int i=0;i<dclocks;i++){
 	    //	  for(int i=0;i<4;i++){
-	    //ddata[i]=255;//D0 for least bit(1), D1 second least bit(2)... D15 largest
-	    ddata[i]=(1<<8)-1;//D0 for least bit(1), D1 second least bit(2)... D15 largest
-	    //	    printf("%d",(1<<8));
-	    //ddata[i]=0x0f;//D0 for least bit(1), D1 second least bit(2)... D15 largest
-	  }
-	  for(int i=dclocks;i<2*dclocks;i++){
-	    // ddata[i]=256;
-	    //	    ddata[i]=65280;//0xf0
-	    ddata[i]=(1<<16)-(1<<8);//0xf0
-	    //ddata[i]=(unsigned short)0xf0;
-	  }
-	  //	  for(int i=60;i<90;i++){
-	  //  ddata[i]=2;
-	  // }
-	  //	for(int i=0;i<1000;i++)
-	  printf("Num of output channel:%d\n",dio->getNbChannelsOut());
-	  dio->push(ddata,2*dclocks);
+	ddata[i]=(1<<8)-1;//D0-D7 HIGH / D8-D15 LOW (D0 for least bit(1), D1 second least bit(2)... D15 largest) 
+      }
+      for(int i=dclocks;i<2*dclocks;i++){
+	//	ddata[i]=(1<<16)-(1<<8);//D0-D7 LOW / D8-D15 HIGH (0xf0) 
+	ddata[i]=(1<<16)-(1<<8);//D0-D7 LOW / D8-D15 HIGH (0xf0) 
+      }
+      printf("Num of output channel:%d\n",dio->getNbChannelsOut());
+      dio->enableAllOut(true);	      
+      dio->push(ddata,2*dclocks);
   }
   
   if(aopt){
