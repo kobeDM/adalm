@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   int ddir=1;//0for input, 1 for output
   const double freq=7.5e7; // clock for analog out
   const double dfreq=1e8; // clock for digital
-  vector<double> freqs;  
+  //  vector<double> freqs;  
   //timestamp
   //  struct timeval tv;
   //configure
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         //return -1;
   //}
   printf("ad_out: ADALM2000 output sample program\n");
-  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] \n");
+  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] [-f rate(Hz)] \n");
   int hopt = 0;
   int sopt = 0;
   int uopt = 0;
@@ -50,8 +50,10 @@ int main(int argc, char* argv[])
   int vopt=0;
   int ropt=0;
   int wopt=0;
+  int fopt=0;
   int dopt = 0; //digital out
-  int aopt = 1; //analog out, default 
+  int aopt = 1; //analog out, default
+  double rate=0;
   //  char *cparam = NULL;
   string URI;
   char *dparam = NULL;
@@ -64,13 +66,14 @@ int main(int argc, char* argv[])
       { "V2",  required_argument, NULL, 'w' },
       { "URI",  required_argument, NULL, 'u' },
       { "DIGITAL", no_argument, NULL, 'd' },
+      { "FREQ", no_argument, NULL, 'f' },
       { "help", no_argument, NULL, 'h' },
       { 0,        0,                 0,     0  },
   };
   int opt;
   int longindex;
   int numopt=0;
-  while ((opt = getopt_long(argc, argv, "hadsu:t:v:r:w:", longopts, &longindex)) != -1) {
+  while ((opt = getopt_long(argc, argv, "hadsu:t:v:r:w:f:", longopts, &longindex)) != -1) {
     //    printf("%d %s\n", longindex, longopts[longindex].name);
     switch (opt) {
     case 'h':
@@ -116,6 +119,11 @@ int main(int argc, char* argv[])
       break;
     case 's':
       sopt = 1;
+      numopt++;
+      break;
+    case 'f':
+      fopt = 1;
+      rate=(atof)(optarg);
       numopt++;
       break;
     default:
@@ -283,7 +291,7 @@ int main(int argc, char* argv[])
   
   if(aopt){
     M2kAnalogOut *aout = ctx->getAnalogOut();//for analog  
-    freqs=aout->getAvailableSampleRates(0);
+    //freqs=aout->getAvailableSampleRates(0);
     //   printf("Available closks [Hz]: ");
     //for (int i = 0; i < freqs.size(); i++)
     //  printf("%.1e, ", freqs[i]);
@@ -295,7 +303,8 @@ int main(int argc, char* argv[])
     for (int i = 0; i < 2; i++){
       aout->setSampleRate(i,freq);
       aout->enableChannel(i, true);
-      printf("ch %d freq=%.1e Hz (%.0f ns/clock)\n",i,aout->getSampleRate(i),1e9/aout->getSampleRate(i));
+      printf("ch %d freq=%.1e Hz (%.0f ns/clock)",i,aout->getSampleRate(i),1e9/aout->getSampleRate(i));
+      printf("\n");
     }
     //    aout->setSampleRate(1,freq);
     //	aout->enableChannel(0, true);
@@ -337,16 +346,30 @@ int main(int argc, char* argv[])
 	  //pulse_0.push_back(V[0]*2);//for 50ohm to 50ohm
 	  //pulse[i]=V[0];
 	  //}
-    printf("ch0 %.3lfV %dns (%d clock)\n",V[0],T[0],(int)pulse_0.size());
-    printf("ch1 %.3lfV %dns (%d clock)\n",V[1],T[1],(int)pulse_1.size());
+    printf("ch0 %.3lfV %dns (%d clock)\t",V[0],T[0],(int)pulse_0.size());
+    if(fopt)printf("repeting at %d Hz.",(int)rate);
+    printf("\n");
+    printf("ch1 %.3lfV %dns (%d clock)\t",V[1],T[1],(int)pulse_1.size());
+    if(fopt)printf("repeting at %d Hz.",(int)rate);
+    printf("\n");
     //	aout->setCyclic(true);
     aout->setCyclic(false);
 	//aout->push({sinv,saw});
 		//aout->push({saw,sinv});
 	//aout->push(0,sinv);
 	//	aout->push({pulse_0,pulse_1});
+    //    aout->enableChannel(0, true);
+    //aout->enableChannel(1, true);
     aout->push(0,pulse_0);
     aout->push(1,pulse_1);
+
+
+    while(fopt){
+      usleep(int(1e6/rate));
+      aout->push(0,pulse_0);
+      aout->push(1,pulse_1);
+    }
+    
   }
   
 	//#ifdef TRIGGERING
