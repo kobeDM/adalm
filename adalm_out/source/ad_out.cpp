@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         //return -1;
   //}
   printf("ad_out: ADALM2000 output sample program\n");
-  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] [-f rate(Hz)] \n");
+  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] [-f rate(Hz) (for aout)] [-l (digital-latchup)] [-m (digital-latchdown)]\n");
   int hopt = 0;
   int sopt = 0;
   int uopt = 0;
@@ -52,6 +52,8 @@ int main(int argc, char* argv[])
   int wopt=0;
   int fopt=0;
   int dopt = 0; //digital out
+  int lopt = 0; //digital latch up
+  int mopt = 0; //digital latch up
   int aopt = 1; //analog out, default
   double rate=0;
   //  char *cparam = NULL;
@@ -66,6 +68,8 @@ int main(int argc, char* argv[])
       { "V2",  required_argument, NULL, 'w' },
       { "URI",  required_argument, NULL, 'u' },
       { "DIGITAL", no_argument, NULL, 'd' },
+      { "DIGITAL_LATCHUP", no_argument, NULL, 'l' },
+      { "DIGITAL_LATCHDOWN", no_argument, NULL, 'm' },
       { "FREQ", no_argument, NULL, 'f' },
       { "help", no_argument, NULL, 'h' },
       { 0,        0,                 0,     0  },
@@ -73,11 +77,23 @@ int main(int argc, char* argv[])
   int opt;
   int longindex;
   int numopt=0;
-  while ((opt = getopt_long(argc, argv, "hadsu:t:v:r:w:f:", longopts, &longindex)) != -1) {
+  while ((opt = getopt_long(argc, argv, "mlhadsu:t:v:r:w:f:", longopts, &longindex)) != -1) {
     //    printf("%d %s\n", longindex, longopts[longindex].name);
     switch (opt) {
     case 'h':
       hopt = 1;
+      numopt++;
+      break;
+    case 'l':
+      lopt = 1;
+      dopt=1;
+      aopt=0;
+      numopt++;
+      break;
+    case 'm':
+      mopt = 1;
+      dopt=1;
+      aopt=0;
       numopt++;
       break;
     case 'a':
@@ -93,7 +109,7 @@ int main(int argc, char* argv[])
       uopt=1;
       numopt+=2;
       URI=optarg;
-      //cout <<"URI to access:"<<URI<<endl;
+      cout <<"URI to access:"<<URI<<endl;
       break;
     case 't':
       topt=1;
@@ -149,13 +165,19 @@ int main(int argc, char* argv[])
     dopt=0;
   }
   if(dopt){
-    cout <<"**** Digital output mode is selected. ****"<<endl;
+    if(lopt){
+    cout <<"**** Digital latch up is selected. ****"<<endl;
+    }
+    if(mopt){
+    cout <<"**** Digital latch down is selected. ****"<<endl;
+    }
+    else cout <<"**** Digital output mode is selected. ****"<<endl;
   }
   //  printf("b = %d\n", bopt);
   if(uopt){
     //printf("u = %d, %s\n", uopt, URI.c_str());
   //  printf("c = %d, %s\n", uopt, cparam);
-    cout<<"URI to access:"<<URI<<endl;
+    cout<<"URI to access: "<<URI<<endl;
   }
   if(!topt){
     T[0]=dT=500;
@@ -210,10 +232,10 @@ int main(int argc, char* argv[])
 
     }
   }  
-  if(dopt){
-  dclocks=((int)(dT*dfreq*1e-9))/4*4;
-  if(dclocks<16)dclocks=16;
-  printf("%dns (%d clocks)\n",dT,dclocks);
+  if(dopt&&!lopt&&!mopt){
+    dclocks=((int)(dT*dfreq*1e-9))/4*4;
+    if(dclocks<16)dclocks=16;
+    printf("%dns (%d clocks)\n",dT,dclocks);
   }  
   //----------------------------
   //  configure
@@ -231,21 +253,20 @@ int main(int argc, char* argv[])
   //  Open ADALM2000
   //  uopt=0;
   M2k *ctx;//= m2kOpen();
-  ctx= m2kOpen();
-  if (!ctx) {
-    std::cout << "Connection Error: No ADALM2000 device available/connected to your PC." << std::endl;
-    return 1;
-  }
-
   if(uopt){
     //    M2k *ctx = m2kOpen(URI.c_str());
     ctx = m2kOpen(URI.c_str());
+  }
+  else{
+    ctx= m2kOpen();
+  }
+    
     if (!ctx) {
       std::cout << "Connection Error: No ADALM2000 device available/connected to your PC." << std::endl;
       return 1;
       
     }
-  }
+
   
   string SN=ctx->getSerialNumber();
   //string
@@ -268,25 +289,46 @@ int main(int argc, char* argv[])
     dio->setOutputMode(i,DIO_MODE(dmode));
     dio->setDirection(i,DIO_DIRECTION(ddir));
   }
-    dio->setCyclic(false);
-  //dio->setCyclic(true);
-  for (int i=0;i<8;i++){
-  dio->setValueRaw(i,DIO_LEVEL(0));
-  dio->setValueRaw(i+8,DIO_LEVEL(1));
-  //dio->setValueRaw(i+8,DIO_LEVEL(0));
+  dio->setCyclic(false);
+
+  if(lopt){
+    int ch=6;
+    for (int i=0;i<ch;i++){
+      dio->setValueRaw(i,DIO_LEVEL(1));
+    }
+  for (int i=0;i<ch;i++){
+    dio->setValueRaw(i+8,DIO_LEVEL(0));
   }
-      unsigned short  ddata[1024];
-      for(int i=0;i<dclocks;i++){
-	    //	  for(int i=0;i<4;i++){
-	ddata[i]=(1<<8)-1;//D0-D7 HIGH / D8-D15 LOW (D0 for least bit(1), D1 second least bit(2)... D15 largest) 
-      }
-      for(int i=dclocks;i<2*dclocks;i++){
-	//	ddata[i]=(1<<16)-(1<<8);//D0-D7 LOW / D8-D15 HIGH (0xf0) 
-	ddata[i]=(1<<16)-(1<<8);//D0-D7 LOW / D8-D15 HIGH (0xf0) 
-      }
-      printf("Num of output channel:%d\n",dio->getNbChannelsOut());
-      dio->enableAllOut(true);	      
-      dio->push(ddata,2*dclocks);
+  cout<<"digital 0-5ch latched up."<<endl<<flush;
+  while(1){
+     sleep(1);
+   }
+  }
+  if(mopt){
+    int ch=6;
+    for (int i=0;i<ch;i++){
+      dio->setValueRaw(i,DIO_LEVEL(0));
+    }
+  for (int i=0;i<ch;i++){
+    dio->setValueRaw(i+8,DIO_LEVEL(0));
+  }
+  }
+  else{
+  for (int i=0;i<8;i++){
+    dio->setValueRaw(i,DIO_LEVEL(0));
+    dio->setValueRaw(i+8,DIO_LEVEL(1));
+  }
+  unsigned short  ddata[1024];
+  for(int i=0;i<dclocks;i++){
+    ddata[i]=(1<<8)-1;//D0-D7 HIGH / D8-D15 LOW (D0 for least bit(1), D1 second least bit(2)... D15 largest) 
+  }
+  for(int i=dclocks;i<2*dclocks;i++){
+    ddata[i]=(1<<16)-(1<<8);//D0-D7 LOW / D8-D15 HIGH (0xf0) 
+  }
+  printf("Num of output channel:%d\n",dio->getNbChannelsOut());
+  dio->enableAllOut(true);	      
+  dio->push(ddata,2*dclocks);
+  }
   }
   
   if(aopt){
