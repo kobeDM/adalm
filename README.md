@@ -108,3 +108,45 @@ ex ./getusbport.py 10447384b904001612002500df1edb619310447384b904001612002500df1
     to know the URI for 10447384b904001612002500df1edb619310447384b904001612002500df1edb6193
 ```
 
+# OPTION: ROOT INSTALLATION for Raspberry Pi
+
+ROOT version: 6.18.04 (recommended by S.Higashino: not the latest version but confirmed to work in the Raspberry Pi OS)
+
+Download from the CERN ROOT homepage: https://root.cern/install/all_releases/
+
+```
+$ cd Download
+$ tar -zxvf root_v6.18.04.source.tar.gz
+$ sudo move /opt/root/6_18_04 root-6.18.04
+```
+
+Before starting to compile, you have to install some related packages as shown in the ROOT installation guide: https://root.cern/install/dependencies/
+
+```
+$ sudo apt install dpkg-dev cmake g++ gcc binutils libx11-dev libxpm-dev \
+libxft-dev libxext-dev python libssl-dev
+```
+
+and one more package: 
+
+```
+$ sudo apt install davix-dev
+```
+
+Then, it's time to compile ROOT!
+
+```
+$ sudo mkdir build_root
+$ cd build_root
+$ sudo cmake –DCMAKE_SHARED_LINKER_FLAGS=‘-latomic’ ../root-6.18.04
+$ sudo make -j2
+$ sudo make install
+```
+
+The compile should be done successfully. After the compilation, you have to source thisroot.sh (or thisroot.{fish, csh}):
+
+```
+$ source /opt/root/6_18_04/build_root/bin/thisroot.sh
+```
+
+or input it in your .bashrc (or something like that).
