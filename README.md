@@ -138,7 +138,7 @@ Then, it's time to compile ROOT!
 ```
 $ sudo mkdir build_root
 $ cd build_root
-$ sudo cmake –DCMAKE_SHARED_LINKER_FLAGS=‘-latomic’ ../root-6.18.04
+$ sudo cmake –DCMAKE_SHARED_LINKER_FLAGS=‘-latomic’ -DPYTHON_EXECUTABLE='/usr/bin/python3' ../root-6.18.04
 $ sudo make -j2
 $ sudo make install
 ```
