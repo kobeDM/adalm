@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
     std::cout << std::endl;
 
-    const double dfreq=1e5; // clock for digital
+    const double dfreq=1e6; // clock for digital
 
     M2kDigital *dio = ctx->getDigital(); //for dio
     if( dio == nullptr ) return 1;
@@ -146,18 +146,17 @@ int main(int argc, char* argv[])
     vector< unsigned short > dataArr;
     readBitStream( inputfile, &dataArr );
     cout << dataArr.size( ) << endl;
-    // checkData( &dataArr );
+    // checkData( &dataArr ); // for debug
     dio->enableAllOut(true);
+
+    dataArr.resize(10000); // NOTICE!! : BLACK MAGIC...
     dio->push( dataArr );
-    
-    // sleep( 1 );
 
     dio->enableAllOut(false);
     contextClose(ctx);
     
     return 0;
 }
-
 
 
 bool readBitStream( const string& inputFile, vector< unsigned short >* pData )
