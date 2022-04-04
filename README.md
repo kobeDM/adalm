@@ -58,7 +58,7 @@ $ make install
 ## ADALM DAQ TOOL
 ```
 $ git clone https://github.com/kobeDM/adalm.git
-$ cd adalm
+$ cd adalm/adalm_daq
 $ mkdir build
 $ cd build
 $ cmake ../source

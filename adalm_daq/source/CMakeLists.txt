@@ -16,15 +16,12 @@ endif()
 
 add_executable(daq "daq.cpp")
 add_executable(daq_test "daq_test.cpp")
-add_executable(daq_sahigash "daq_sahigash.cpp")
 
 target_link_libraries(daq PRIVATE libm2k::libm2k)
 target_link_libraries(daq_test PRIVATE libm2k::libm2k)
-target_link_libraries(daq_sahigash PRIVATE libm2k::libm2k)
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/..)
 install(TARGETS daq DESTINATION bin)
 install(TARGETS daq_test DESTINATION bin)
-install(TARGETS daq_sahigash DESTINATION bin)
 
 
