@@ -47,7 +47,7 @@ void DrawWaveform(const String& filename, const String& outputDir )
         else if( ch2 > ch2Max ) ch2Max = ch2;
         
         histWFCh1.Fill(clock, ch1);
-        histWFCh1.Fill(clock, ch2);
+        histWFCh2.Fill(clock, ch2);
         ++clock;
     }
 
