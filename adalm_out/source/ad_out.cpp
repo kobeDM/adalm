@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         //return -1;
   //}
   printf("ad_out: ADALM2000 output sample program\n");
-  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] [-f rate(Hz) (for aout)] [-l (digital-latchup)] [-m (digital-latchdown)]\n");
+  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] [-f rate(Hz) (for aout)] [-n num of pulses (for aout with -f)] [-l (digital-latchup)] [-m (digital-latchdown)] \n");
   int hopt = 0;
   int sopt = 0;
   int uopt = 0;
@@ -51,10 +51,13 @@ int main(int argc, char* argv[])
   int ropt=0;
   int wopt=0;
   int fopt=0;
+  int nopt=0;
   int dopt = 0; //digital out
   int lopt = 0; //digital latch up
   int mopt = 0; //digital latch up
   int aopt = 1; //analog out, default
+  int pulse_done;
+  int       numofpulses=1;
   double rate=0;
   //  char *cparam = NULL;
   string URI;
@@ -70,14 +73,15 @@ int main(int argc, char* argv[])
       { "DIGITAL", no_argument, NULL, 'd' },
       { "DIGITAL_LATCHUP", no_argument, NULL, 'l' },
       { "DIGITAL_LATCHDOWN", no_argument, NULL, 'm' },
-      { "FREQ", no_argument, NULL, 'f' },
+      { "FREQ", required_argument, NULL, 'f' },
+      { "NUM_OF_PULSES", required_argument, NULL, 'n' },
       { "help", no_argument, NULL, 'h' },
       { 0,        0,                 0,     0  },
   };
   int opt;
   int longindex;
   int numopt=0;
-  while ((opt = getopt_long(argc, argv, "mlhadsu:t:v:r:w:f:", longopts, &longindex)) != -1) {
+  while ((opt = getopt_long(argc, argv, "mlhadsu:t:v:r:w:f:n:", longopts, &longindex)) != -1) {
     //    printf("%d %s\n", longindex, longopts[longindex].name);
     switch (opt) {
     case 'h':
@@ -140,6 +144,11 @@ int main(int argc, char* argv[])
     case 'f':
       fopt = 1;
       rate=(atof)(optarg);
+      numopt++;
+      break;
+    case 'n':
+      nopt = 1;
+      numofpulses=(atoi)(optarg);
       numopt++;
       break;
     default:
@@ -389,9 +398,11 @@ int main(int argc, char* argv[])
 	  //pulse[i]=V[0];
 	  //}
     printf("ch0 %.3lfV %dns (%d clock)\t",V[0],T[0],(int)pulse_0.size());
+    if(nopt)printf("%d pulses ",(int)numofpulses);
     if(fopt)printf("repeting at %d Hz.",(int)rate);
     printf("\n");
     printf("ch1 %.3lfV %dns (%d clock)\t",V[1],T[1],(int)pulse_1.size());
+    if(nopt)printf("%d pulses ",(int)numofpulses);
     if(fopt)printf("repeting at %d Hz.",(int)rate);
     printf("\n");
     //	aout->setCyclic(true);
@@ -404,14 +415,15 @@ int main(int argc, char* argv[])
     //aout->enableChannel(1, true);
     aout->push(0,pulse_0);
     aout->push(1,pulse_1);
-
-
-    while(fopt){
+    
+    pulse_done=1;
+    while(fopt){    
       usleep(int(1e6/rate));
       aout->push(0,pulse_0);
       aout->push(1,pulse_1);
+      pulse_done++;
+      if(nopt&&      pulse_done>=numofpulses)break;
     }
-    
   }
   
 	//#ifdef TRIGGERING
