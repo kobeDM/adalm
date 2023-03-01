@@ -73,6 +73,9 @@ $ mkdir bench
 $ ../bin/daq_test out 100 1000000 1024 2 0.1 0.1 2 0
 $ ls
 out.dat out.cnf
+
+If ”error while loading shared libraries: libm2k.so.0.7.0: cannot open shared object file: No such file or directory” happens,
+$sudo /sbin/ldconfig 
 ```
 
 ## ADALM OUTPUT SAMPLES
