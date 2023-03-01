@@ -48,6 +48,7 @@ $ cd ~
 $ mkdir local 
 $ cd ~/local
 $ git clone https://github.com/analogdevicesinc/libm2k.git
+$ cd libm2k
 $ mkdir libm2k-build
 $ cd libm2k-build
 $ cmake --prefix=../libm2k-install -DENABLE_EXCEPTIONS=TRUE ../
