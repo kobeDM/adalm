@@ -84,6 +84,7 @@ $sudo /sbin/ldconfig
 # COMPLIE
 $ cd ${adalm_out}
 $ mkdir build
+$ cd build
 $ cmake ../source
 $make
 $./ad_out
