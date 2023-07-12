@@ -24,8 +24,8 @@ const int TARGET_CHANNEL = 0;
 // ------------------------------------------------------------------
 // Shutter open / close parameters are fixed.
 // You can change the rotation angle with below params.
-const double DUTY_CYCLE_OPEN  = 0.12;
-const double DUTY_CYCLE_CLOSE = 0.05;
+const double DUTY_CYCLE_OPEN  = 0.05;
+const double DUTY_CYCLE_CLOSE = 0.14;
 
 // ------------------------------------------------------------------
 // Shutter control pulse frequency [Hz] is fixed.
