@@ -25,7 +25,7 @@ const int TARGET_CHANNEL = 0;
 // Shutter open / close parameters are fixed.
 // You can change the rotation angle with below params.
 const double DUTY_CYCLE_OPEN_LARGE  = 0.05;
-const double DUTY_CYCLE_OPEN_MIDDLE = 0.075;
+const double DUTY_CYCLE_OPEN_MEDIUM = 0.075;
 const double DUTY_CYCLE_OPEN_SMALL  = 0.105;
 const double DUTY_CYCLE_CLOSE       = 0.14;
 
@@ -53,14 +53,14 @@ const double ADALM_OUTPUT_POWER_SUPPLY = 5.0; // [V]
 enum ADALM_SHUTTER_STATUS {
 			   SHUTTER_CLOSE       = 0,
 			   SHUTTER_OPEN_SMALL  = 1,
-			   SHUTTER_OPEN_MIDDLE = 2,
+			   SHUTTER_OPEN_MEDIUM = 2,
 			   SHUTTER_OPEN_LARGE  = 3
 };
 
 void usage( )
 {
     std::cout << "Usage:" << std::endl;
-    std::cout << "./shutter_ctrl [CLOSE, SMALL, MIDDLE or LARGE]" << std::endl;
+    std::cout << "./shutter_ctrl [CLOSE, SMALL, MEDIUM or LARGE]" << std::endl;
     std::cout << std::endl;
     std::cout << "bye..." << std::endl;
     
@@ -92,12 +92,12 @@ int main(int argc, char* argv[])
 	status = ADALM_SHUTTER_STATUS::SHUTTER_OPEN_SMALL;
 	dutyCicle = DUTY_CYCLE_OPEN_SMALL;
     }
-    else if( shutterStatusStr == "MIDDLE"  ) {
+    else if( shutterStatusStr == "MEDIUM"  ) {
         std::cout << std::endl;
-        std::cout << "--- SHUTTER OPEN (MIDDLE) ---" << std::endl;
+        std::cout << "--- SHUTTER OPEN (MEDIUM) ---" << std::endl;
         std::cout << std::endl;
-	status = ADALM_SHUTTER_STATUS::SHUTTER_OPEN_MIDDLE;
-	dutyCicle = DUTY_CYCLE_OPEN_MIDDLE;
+	status = ADALM_SHUTTER_STATUS::SHUTTER_OPEN_MEDIUM;
+	dutyCicle = DUTY_CYCLE_OPEN_MEDIUM;
     }
     else if( shutterStatusStr == "LARGE"  ) {
         std::cout << std::endl;
