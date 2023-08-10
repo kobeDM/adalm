@@ -24,8 +24,10 @@ const int TARGET_CHANNEL = 0;
 // ------------------------------------------------------------------
 // Shutter open / close parameters are fixed.
 // You can change the rotation angle with below params.
-const double DUTY_CYCLE_OPEN  = 0.05;
-const double DUTY_CYCLE_CLOSE = 0.14;
+const double DUTY_CYCLE_OPEN_LARGE  = 0.05;
+const double DUTY_CYCLE_OPEN_MIDDLE = 0.075;
+const double DUTY_CYCLE_OPEN_SMALL  = 0.105;
+const double DUTY_CYCLE_CLOSE       = 0.14;
 
 // ------------------------------------------------------------------
 // Shutter control pulse frequency [Hz] is fixed.
@@ -47,10 +49,18 @@ const double ADALM_OUTPUT_PULSE_HEIGHT = 5.0; // [V]
 // You DON'T HAVE TO CHANGE this value.
 const double ADALM_OUTPUT_POWER_SUPPLY = 5.0; // [V]
 
+
+enum ADALM_SHUTTER_STATUS {
+			   SHUTTER_CLOSE       = 0,
+			   SHUTTER_OPEN_SMALL  = 1,
+			   SHUTTER_OPEN_MIDDLE = 2,
+			   SHUTTER_OPEN_LARGE  = 3
+};
+
 void usage( )
 {
     std::cout << "Usage:" << std::endl;
-    std::cout << "./shutter_ctrl [CLOSE or OPEN]" << std::endl;
+    std::cout << "./shutter_ctrl [CLOSE, SMALL, MIDDLE or LARGE]" << std::endl;
     std::cout << std::endl;
     std::cout << "bye..." << std::endl;
     
@@ -64,19 +74,37 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-    bool isOpen = false;
-    std::string isOpenStr = argv[1];
-    if( isOpenStr == "CLOSE" ) {
+    // bool isOpen = false;
+    ADALM_SHUTTER_STATUS status = ADALM_SHUTTER_STATUS::SHUTTER_CLOSE;
+    std::string shutterStatusStr = argv[1];
+    double dutyCicle = 0.0;
+    if( shutterStatusStr == "CLOSE" ) {
         std::cout << std::endl;
         std::cout << "--- SHUTTER CLOSE ---" << std::endl;
         std::cout << std::endl;
-        isOpen = false;
+	status = ADALM_SHUTTER_STATUS::SHUTTER_CLOSE;
+	dutyCicle = DUTY_CYCLE_CLOSE;
     }
-    else if( isOpenStr == "OPEN"  ) {
+    else if( shutterStatusStr == "SMALL"  ) {
         std::cout << std::endl;
-        std::cout << "--- SHUTTER OPEN ---" << std::endl;
+        std::cout << "--- SHUTTER OPEN (SMALL) ---" << std::endl;
         std::cout << std::endl;
-        isOpen = true;
+	status = ADALM_SHUTTER_STATUS::SHUTTER_OPEN_SMALL;
+	dutyCicle = DUTY_CYCLE_OPEN_SMALL;
+    }
+    else if( shutterStatusStr == "MIDDLE"  ) {
+        std::cout << std::endl;
+        std::cout << "--- SHUTTER OPEN (MIDDLE) ---" << std::endl;
+        std::cout << std::endl;
+	status = ADALM_SHUTTER_STATUS::SHUTTER_OPEN_MIDDLE;
+	dutyCicle = DUTY_CYCLE_OPEN_MIDDLE;
+    }
+    else if( shutterStatusStr == "LARGE"  ) {
+        std::cout << std::endl;
+        std::cout << "--- SHUTTER OPEN (LARGE) ---" << std::endl;
+        std::cout << std::endl;
+	status = ADALM_SHUTTER_STATUS::SHUTTER_OPEN_LARGE;
+	dutyCicle = DUTY_CYCLE_OPEN_LARGE;
     }
     else {
         usage( );
@@ -84,7 +112,8 @@ int main(int argc, char* argv[])
 
     // Create control pulse
     int nSample = static_cast< int >( ADALM_SAMPLE_FREQ / CTRL_FREQ );
-    int nHigh   = isOpen == true ? nSample * DUTY_CYCLE_OPEN : nSample * DUTY_CYCLE_CLOSE;
+    int nHigh   = nSample * dutyCicle;
+
     std::cout << "Total sampling per pulse: " << nSample << ", " << 1000.0 / CTRL_FREQ << " ms" << std::endl;
     std::cout << "duty cycle: " << nHigh << ", " << 100.0 * (double)nHigh / (double)nSample << " %" << std::endl;
     
@@ -100,7 +129,7 @@ int main(int argc, char* argv[])
     // Open ADALM
     std::cout << "Open ADALM" << std::endl;
     M2k *pContext = m2kOpen();
-	if( pContext == nullptr ) {
+    if( pContext == nullptr ) {
         std::cout << "Connection Error: No ADALM2000 device available/connected to your PC." << std::endl;
         return -1;
 	}
