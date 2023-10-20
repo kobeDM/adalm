@@ -16,7 +16,7 @@ see! URL : https://wiki.analog.com/resources/tools-software/linux-software/libii
 $ cd ~/
 $ mkdir tmp; cd tmp
 $ sudo apt install bison flex libcdk5-dev swig
-$ sudo apt install libaio-dev libusb-1.0-0-dev libserialport-dev libxml2-dev libavahi-client-dev doxygen graphviz
+$ sudo apt install libaio-dev libusb-1.0-0-dev libserialport-dev libxml2-dev libavahi-client-dev doxygen graphviz libzstd-dev
 $ git clone https://github.com/pcercuei/libini.git
 $ cd libini
 $ mkdir build && cd build && cmake ../ && make && sudo make install
