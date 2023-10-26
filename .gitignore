@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+*.png
+*.txt
+*.dat
+*.cnf
+*.root
+.vscode
+build
+daq/bin/daq
