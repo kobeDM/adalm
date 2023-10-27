@@ -112,9 +112,9 @@ void fitSpectrum(const std::string resultdir, const float fitCh1_min,
     const float sigma_2 = fit[1]->GetParameter(2);
     const float simgae_2 = fit[1]->GetParError(2);
     tex.SetTextSize(0.04);
-    tex.DrawLatex(150 * 0.55, 0.95 * histSp[0]->GetMaximum(),
+    tex.DrawLatex(150 * 0.55, 0.95 * histSp[1]->GetMaximum(),
                   Form("mean : %4.2f +- %3.2f", mean_2, meane_2));
-    tex.DrawLatex(150 * 0.55, 0.9 * histSp[0]->GetMaximum(),
+    tex.DrawLatex(150 * 0.55, 0.9 * histSp[1]->GetMaximum(),
                   Form("sigma : %3.2f +- %3.2f", sigma_2, simgae_2));
 
     // save
