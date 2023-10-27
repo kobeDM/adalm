@@ -39,3 +39,4 @@
 .vscode
 build
 daq/bin/daq
+.venv
