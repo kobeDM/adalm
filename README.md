@@ -1,43 +1,18 @@
-# gainAna
-Software for LBGuPIC gain measurement
+# adalm
+Software for measurement and analysis using ADALM 2000
+### Installation
+1. Follow the instructions in the main branch
+2. Enter the directory location in soft_path in config
+### DAQ
+    ```
+    $ cd daq/bin
+    $ ./daq.py
+    ```
+1. Measurement results are stored in the `daq/data/subrun_name/run_name` directory
 
-# DAQ
-### build
-```
-$ cd ${gainAna}/daq
-$ mkdir build
-$ cd build
-$ cmake ../src
-$ make install
-# binary is created in ${gainAna}/daq/bin
-```
-### execute
-```
-$ cd ${gainAna}/daq/bin
-$ python3 daq.py [subrun name]
-# data is recorded in ${gainAna}/daq/data
-```
-
-# analyzer
-### execute
-```
-$ cd ${gainAna}/ana/script
-$ python3 analyzer.py
-# result is created in ${gainAna}/ana/result
-```
-# config file
-- soft_path : directory where the gainAna is located
-- sub_dir   : sub directry name
-
-### daq
-- subentries    : per 1 subrun entries
-- sampling_rate : max 100000000 (Hz) 1colck=10ns
-- sampling_num  : the number of clock / event
-- dynamic_range : 0(+/-25V) or 1(+/-2.5V)
-- trigger_Vth_1/2ch : V
-- trigger_src       : 'ch1=0' or 'ch2=1' or 'or-trig=2'
-- trigger_type      : 'rise=0' or 'fall=1'
-- uri               : can be checked from getusbport.py
-
-### ana
-- 
+### Analyze
+    ```
+    $ cd ana/bin
+    $ ./analyze.py <run_name> <datafile_No.>
+    ```
+1. The analysis results are saved in the `ana/result/subrun_name/run_name` directory
