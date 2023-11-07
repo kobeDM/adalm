@@ -5,10 +5,11 @@ import subprocess
 import json
 from datetime import datetime
 
+SOFT_DIR = os.environ['ADSW']
+
 # import config file
 with open('../../cfg/config.json', 'r') as f:
     j = json.load(f)
-SOFT_DIR = j['soft_path']
 SUB_DIR = j['sub_dir']
 
 # arguments

@@ -16,7 +16,9 @@ if(len(sys.argv)!=1):
 
 print(' run START ---->')
 
-data_dir = j['soft_path']+'/daq/data'
+SOFT_PATH = os.environ['ADSW']
+print('SOFT_PATH : '+SOFT_PATH)
+data_dir = SOFT_PATH+'/daq/data'
 sub_dir = j['sub_dir']
 
 

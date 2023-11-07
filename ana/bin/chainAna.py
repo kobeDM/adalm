@@ -3,13 +3,11 @@
 import os, sys
 import subprocess
 import json
-import glob
-import time
-from datetime import datetime
+
+SOFT_DIR = os.environ['ADSW']
 
 with open('../../cfg/config.json', 'r') as f:
     j = json.load(f)
-SOFT_DIR = j['soft_path']
 SUB_DIR = j['sub_dir']
 if(len(sys.argv)!=3):
     print('Usage : ./analyzer.py [initial run] [final run]')
