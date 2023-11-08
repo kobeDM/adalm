@@ -1,6 +1,4 @@
 {
-    "soft_path": "/home/msgc/adalm",
-    "sub_dir": "20231026",
     "daq": {
         "subentries": 3000,
         "sampling_rate": 10000000,

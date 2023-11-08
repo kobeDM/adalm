@@ -10,7 +10,8 @@ SOFT_DIR = os.environ['ADSW']
 # import config file
 with open('../../cfg/config.json', 'r') as f:
     j = json.load(f)
-SUB_DIR = j['sub_dir']
+# SUB_DIR = j['sub_dir']
+SUB_DIR = datetime.now().strftime("%Y%m%d")
 
 # arguments
 if(len(sys.argv)!=3):
