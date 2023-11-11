@@ -19,4 +19,3 @@ target_link_libraries(daq PRIVATE libm2k::libm2k)
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/..)
 install(TARGETS daq DESTINATION bin)
-install(TARGETS daq_test DESTINATION bin)
