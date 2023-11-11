@@ -39,3 +39,4 @@
 build
 daq/bin/daq
 .venv
+cfg/config.json
