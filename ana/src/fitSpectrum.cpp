@@ -1,8 +1,23 @@
 #include "inc/inc.hpp"
 
-void fitSpectrum(const std::string resultdir, const float fitCh1_min,
-                 const float fitCh1_max, const float fitCh2_min,
-                 const float fitCh2_max, const int ch, const int n) {
+void fitSpectrum(const std::string resultdir, const int n) {
+    // get ADSW path
+    const char *SOFT_PATH = std::getenv("ADSW");
+    std::string soft_path(std::getenv("ADSW"));
+    if (soft_path.empty()) {
+        std::cout << "ADSW environment variable is not set" << std::endl;
+        return;
+    }
+
+    // read json
+    const std::string jsonfile = Form("%s/cfg/config.json", soft_path.c_str());
+    boost::property_tree::ptree pt;
+    read_json(jsonfile, pt);
+    boost::optional<int> fitCh1_min = pt.get_optional<int>("ana.ch1_min");
+    boost::optional<int> fitCh1_max = pt.get_optional<int>("ana.ch1_max");
+    boost::optional<int> fitCh2_min = pt.get_optional<int>("ana.ch2_min");
+    boost::optional<int> fitCh2_max = pt.get_optional<int>("ana.ch2_max");
+    boost::optional<int> ch = pt.get_optional<int>("ana.fit_ch");
 
     gROOT->SetBatch();
     const Int_t NRGBs = 5;
@@ -40,12 +55,12 @@ void fitSpectrum(const std::string resultdir, const float fitCh1_min,
     for (int i = 0; i < 2; i++) {
         histSp[i] = new TH1F(Form("histSp%i", i + 1), Form("histSp%i", i + 1),
                              150, 0, 150);
-        if (ch == 1)
+        if (ch.get() == 1)
             fit[i] =
-                new TF1(Form("fit%i", i + 1), "gaus", fitCh1_min, fitCh1_max);
+                new TF1(Form("fit%i", i + 1), "gaus", fitCh1_min.get(), fitCh1_max.get());
         else
             fit[i] =
-                new TF1(Form("fit%i", i + 1), "gaus", fitCh2_min, fitCh2_max);
+                new TF1(Form("fit%i", i + 1), "gaus", fitCh2_min.get(), fitCh2_max.get());
     }
 
     // set data
@@ -59,7 +74,7 @@ void fitSpectrum(const std::string resultdir, const float fitCh1_min,
     int count = 0;
     while (ifs >> bool1 >> bool2) {
         tree->GetEntry(count);
-        if (ch == 1) {
+        if (ch.get() == 1) {
             // ch1
             histSp[0]->Fill(adcCh1);
             if (bool1 == true) {
@@ -82,10 +97,10 @@ void fitSpectrum(const std::string resultdir, const float fitCh1_min,
     histSp[0]->GetXaxis()->SetTitle("ADC count");
     histSp[0]->GetYaxis()->SetTitle("Entries");
     histSp[0]->Draw("colz");
-    if (ch == 1)
-        histSp[0]->Fit(fit[0], "q", "", fitCh1_min, fitCh1_max);
+    if (ch.get() == 1)
+        histSp[0]->Fit(fit[0], "q", "", fitCh1_min.get(), fitCh1_max.get());
     else
-        histSp[0]->Fit(fit[0], "q", "", fitCh2_min, fitCh2_max);
+        histSp[0]->Fit(fit[0], "q", "", fitCh2_min.get(), fitCh2_max.get());
     const float mean_1 = fit[0]->GetParameter(1);
     const float meane_1 = fit[0]->GetParError(1);
     const float sigma_1 = fit[0]->GetParameter(2);
@@ -103,10 +118,10 @@ void fitSpectrum(const std::string resultdir, const float fitCh1_min,
     histSp[1]->GetXaxis()->SetTitle("ADC count");
     histSp[1]->GetYaxis()->SetTitle("Entries");
     histSp[1]->Draw("colz");
-    if (ch == 1)
-        histSp[1]->Fit(fit[1], "q", "", fitCh1_min, fitCh1_max);
+    if (ch.get() == 1)
+        histSp[1]->Fit(fit[1], "q", "", fitCh1_min.get(), fitCh1_max.get());
     else
-        histSp[1]->Fit(fit[1], "q", "", fitCh2_min, fitCh2_max);
+        histSp[1]->Fit(fit[1], "q", "", fitCh2_min.get(), fitCh2_max.get());
     const float mean_2 = fit[1]->GetParameter(1);
     const float meane_2 = fit[1]->GetParError(1);
     const float sigma_2 = fit[1]->GetParameter(2);
@@ -118,7 +133,7 @@ void fitSpectrum(const std::string resultdir, const float fitCh1_min,
                   Form("sigma : %3.2f +- %3.2f", sigma_2, simgae_2));
 
     // save
-    if (ch == 1)
+    if (ch.get() == 1)
         cvs->SaveAs(Form("%s/fitSpectrumCh1_%i.png", resultdir.c_str(), n));
     else
         cvs->SaveAs(Form("%s/fitSpectrumCh2_%i.png", resultdir.c_str(), n));
