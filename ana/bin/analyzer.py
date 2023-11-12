@@ -54,7 +54,7 @@ def run_fitSpectrum():
     if (j['ana']['fit'] is True):
         print('>>> execute fitSpectrum.cpp')
         macro_path = SOFT_DIR+'/ana/src/fitSpectrum.cpp'
-        root_cmd = macro_path + '("' + OUT_DIR + '", ' + str(j['ana']['ch1_min']) + ', ' + str(j['ana']['ch1_max']) + ', ' + str(j['ana']['ch2_min']) + ', ' + str(j['ana']['ch2_max']) + ', ' + str(j['ana']['fit_ch']) + ', ' + str(SUBRUN_NO) + ')'
+        root_cmd = macro_path + '("' + OUT_DIR + '", '  + str(SUBRUN_NO) + ')'
         cmd = ['root', '-q', '-l', '-n', root_cmd]
         subprocess.run(cmd)
 
