@@ -1,6 +1,21 @@
 #include "inc/inc.hpp"
 
 void eventSelect(const std::string &resultdir) {
+    // get ADSW path
+    const char *SOFT_PATH = std::getenv("ADSW");
+    std::string soft_path(std::getenv("ADSW"));
+    if (soft_path.empty()) {
+        std::cout << "ADSW environment variable is not set" << std::endl;
+        return;
+    }
+
+    // read json
+    const std::string jsonfile = Form("%s/cfg/config.json", soft_path.c_str());
+    boost::property_tree::ptree pt;
+    read_json(jsonfile, pt);
+    boost::optional<int> ran_min = pt.get_optional<int>("ana.ran_min");
+    boost::optional<int> ran_max = pt.get_optional<int>("ana.ran_max");
+
     gROOT->SetBatch();
 
     TFile *file = new TFile(Form("%s/raw.root", resultdir.c_str()));
@@ -38,12 +53,12 @@ void eventSelect(const std::string &resultdir) {
         dist[1]->Fill(adcCh2, iadcCh2);
     }
 
-    TF1 *fit1 = new TF1("fit1", "pol1");
+    TF1 *fit1 = new TF1("fit1", "pol1", ran_min.get(), ran_max.get());
     dist[0]->Fit("fit1", "q");
     const float itc1 = fit1->GetParameter(0);
     const float slp1 = fit1->GetParameter(1);
 
-    TF1 *fit2 = new TF1("fit2", "pol1");
+    TF1 *fit2 = new TF1("fit2", "pol1", ran_min.get(), ran_max.get());
     dist[1]->Fit("fit2", "q");
     const float itc2 = fit2->GetParameter(0);
     const float slp2 = fit2->GetParameter(1);

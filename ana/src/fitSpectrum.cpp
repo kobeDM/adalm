@@ -13,10 +13,12 @@ void fitSpectrum(const std::string resultdir, const int n) {
     const std::string jsonfile = Form("%s/cfg/config.json", soft_path.c_str());
     boost::property_tree::ptree pt;
     read_json(jsonfile, pt);
-    boost::optional<int> fitCh1_min = pt.get_optional<int>("ana.ch1_min");
-    boost::optional<int> fitCh1_max = pt.get_optional<int>("ana.ch1_max");
-    boost::optional<int> fitCh2_min = pt.get_optional<int>("ana.ch2_min");
-    boost::optional<int> fitCh2_max = pt.get_optional<int>("ana.ch2_max");
+    boost::optional<int> ran_min = pt.get_optional<int>("ana.ran_min");
+    boost::optional<int> ran_max = pt.get_optional<int>("ana.ran_max");
+    boost::optional<int> fitCh1_min = pt.get_optional<int>("ana.fit1_min");
+    boost::optional<int> fitCh1_max = pt.get_optional<int>("ana.fit1_max");
+    boost::optional<int> fitCh2_min = pt.get_optional<int>("ana.fit2_min");
+    boost::optional<int> fitCh2_max = pt.get_optional<int>("ana.fit2_max");
     boost::optional<int> ch = pt.get_optional<int>("ana.fit_ch");
 
     gROOT->SetBatch();
@@ -54,7 +56,7 @@ void fitSpectrum(const std::string resultdir, const int n) {
     TF1 *fit[2];
     for (int i = 0; i < 2; i++) {
         histSp[i] = new TH1F(Form("histSp%i", i + 1), Form("histSp%i", i + 1),
-                             150, 0, 150);
+                             150, ran_min.get(), ran_max.get());
         if (ch.get() == 1)
             fit[i] =
                 new TF1(Form("fit%i", i + 1), "gaus", fitCh1_min.get(), fitCh1_max.get());

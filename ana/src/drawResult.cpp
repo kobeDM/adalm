@@ -1,6 +1,21 @@
 #include "inc/inc.hpp"
 
 void drawResult(const std::string &resultdir, const int n) {
+    // get ADSW path
+    const char *SOFT_PATH = std::getenv("ADSW");
+    std::string soft_path(std::getenv("ADSW"));
+    if (soft_path.empty()) {
+        std::cout << "ADSW environment variable is not set" << std::endl;
+        return;
+    }
+
+    // read json
+    const std::string jsonfile = Form("%s/cfg/config.json", soft_path.c_str());
+    boost::property_tree::ptree pt;
+    read_json(jsonfile, pt);
+    boost::optional<int> ran_min = pt.get_optional<int>("ana.ran_min");
+    boost::optional<int> ran_max = pt.get_optional<int>("ana.ran_max");
+
     gROOT->SetBatch();
     const Int_t NRGBs = 5;
     const Int_t NCont = 255;
@@ -40,17 +55,17 @@ void drawResult(const std::string &resultdir, const int n) {
     for (int i = 0; i < 2; i++) {
         // precut graphs
         wfdist[i] = new TH2F(Form("wfdist%i", i), Form("wfdist%i", i), 1024, 0,
-                             1024, 150, -150, 150);
+                             1024, 150, ran_max.get()*(-1), ran_max.get());
         adcdist1d[i] = new TH1F(Form("adcdist1d%i", i), Form("adcdist1d%i", i),
-                                150, 0, 150);
+                                150, ran_min.get(), ran_max.get());
         // cut graphs
         wfdist_c[i] = new TH2F(Form("wfdist_c%i", i), Form("wfdist_C%i", i),
-                               1024, 0, 1024, 150, -150, 150);
+                               1024, 0, 1024, 150, ran_max.get()*(-1), ran_max.get());
         adcdist1d_c[i] = new TH1F(Form("adcdist1d_c%i", i),
-                                  Form("adcdist1d_c%i", i), 150, 0, 150);
+                                  Form("adcdist1d_c%i", i), 150, ran_min.get(), ran_max.get());
         adcdist2d_c[i] =
-            new TH2F(Form("adcdist_c%i", i), Form("adcdist_c%i", i), 150, 0,
-                     150, 150, -20000, 20000);
+            new TH2F(Form("adcdist_c%i", i), Form("adcdist_c%i", i), 150, ran_min.get(),
+                     ran_max.get(), 150, -20000, 20000);
         fit[i] = new TF1(Form("fit%i", i), "pol1");
         tl[i] = new TLegend(0.7, 0.8, 0.9, 0.9);
     }
@@ -124,7 +139,7 @@ void drawResult(const std::string &resultdir, const int n) {
 
     // for cut
     // cvs_c->cd();
-    const float xx2[4] = {0, 150, 150, 0};
+    const float xx2[4] = {(float)ran_min.get(), (float)ran_max.get(), (float)ran_max.get(), (float)ran_min.get()};
     const int cutwid = 1000;
     for (int i = 0; i < 2; i++) {
         cvs_c->cd(i * 3 + 1);
