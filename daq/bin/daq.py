@@ -35,7 +35,7 @@ def run():
     trigger_type = j['daq']['trigger_type'] # 'rise=0' or 'fall=1'
     uri = 'usb:'+j['daq']['uri'] # adalm uri name
 
-    daq_cmd = j['soft_path']+'/daq/bin/daq' # daq cmd full path
+    daq_cmd = SOFT_PATH+'/daq/bin/daq' # daq cmd full path
 
     subprocess.run(['mkdir', '-p', data_dir+'/'+sub_dir ])
 
@@ -54,7 +54,11 @@ def run():
     ,uri
     ]
 
-    subprocess.run(cmd)
+    try:
+        subprocess.run(cmd)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        delete_newrun(data_dir+"/"+sub_dir+'/')
 
 
 def terminate_run(dir_name):
@@ -77,12 +81,21 @@ def find_newrun(dir_name):
         dirs.sort(reverse=True)
         subrun_dir = dir_name+'/run'+str(int(len(dirs))).zfill(4)
         subprocess.run(['mkdir','-p',dir_name+'/run'+str(int(len(dirs))).zfill(4)])
+        print('run'+str(int(len(dirs))).zfill(4) + '/out')
         return "run" + str(int(len(dirs))).zfill(4)
+
+def delete_newrun(dir_name):
+    dirs = glob.glob(dir_name+"run????")
+    if len(dirs) == 0:
+        return
+    latest_run = dirs[-1]
+    subprocess.run(['rm', '-r', dir_name+'/'+latest_run])
+    print('deleted', latest_run)
 
 def auto_run():
     while(True):
         try:
-            time.sleep(5)
+            time.sleep(1)
             run()
         except KeyboardInterrupt:
             terminate_run(data_dir+'/'+sub_dir+'/')
