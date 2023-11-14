@@ -8,14 +8,14 @@
         "trigger_Vth_2ch": 0.02,
         "trigger_src": 0,
         "trigger_type": 0,
-        "uri": "1.12.5"
+        "uri": "1.6.5"
     },
     "ana": {
         "ran_min": 0,
-        "ran_max": 300,
+        "ran_max": 200,
         "fit": true,
-        "fit1_min": 0,
-        "fit1_max": 300,
+        "fit1_min": 10,
+        "fit1_max": 40,
         "fit2_min": 0,
         "fit2_max": 300,
         "fit_ch": 1
