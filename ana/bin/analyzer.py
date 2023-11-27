@@ -3,26 +3,31 @@
 import os, sys
 import subprocess
 import json
-from datetime import datetime
+import glob
 
 SOFT_DIR = os.environ['ADSW']
 
 # import config file
 with open('../../cfg/config.json', 'r') as f:
     j = json.load(f)
-# SUB_DIR = j['sub_dir']
-SUB_DIR = datetime.now().strftime("%Y%m%d")
 
 # arguments
-if(len(sys.argv)!=3):
-    print('Usage : ./analyzer.py [run No.] [subrun No.]')
+if len(sys.argv) == 3:
+    latest_dir = sorted(glob.glob(SOFT_DIR+'/daq/data/*'))[-1]
+    SUB_DIR = latest_dir.replace(SOFT_DIR+'/daq/data/', '')
+    RUN_NAME = 'run' + sys.argv[1]
+    SUBRUN_NO  = sys.argv[2]
+elif len(sys.argv) == 4:
+    SUB_DIR = sys.argv[1]
+    RUN_NAME = 'run' + sys.argv[2]
+    SUBRUN_NO  = sys.argv[3]
+else:
+    print('Usage1 : ./analyzer.py [run No.] [subrun No.]')
+    print('Usage2 : ./analyzer.py [subdir name] [run No.] [subrun No.]')
     exit(0)
 
-RUN_NAME = 'run' + sys.argv[1]
-SUBRUN_NO  = sys.argv[2]
 SUBRUN_NAME = 'out_'+SUBRUN_NO+'.dat'
 OUT_DIR = SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+RUN_NAME
-
 
 def make_dir():
     subprocess.run(['mkdir', '-p', OUT_DIR])

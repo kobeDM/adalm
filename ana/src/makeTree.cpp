@@ -53,8 +53,8 @@ void makeTree(const std::string &datafile, const std::string &outdirpath) {
                     adcCh2 = ch2Max - pedCh2;
                 else
                     adcCh2 = pedCh2 - ch2Min;
-                iadcCh1 = ch1Sum;
-                iadcCh2 = ch2Sum;
+                iadcCh1 = ch1Sum + pedCh1 * clock;
+                iadcCh2 = ch2Sum + pedCh2 * clock;
                 tree->Fill();
             }
             ++evtID;

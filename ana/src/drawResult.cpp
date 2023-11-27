@@ -13,6 +13,7 @@ void drawResult(const std::string &resultdir, const int n) {
     const std::string jsonfile = Form("%s/cfg/config.json", soft_path.c_str());
     boost::property_tree::ptree pt;
     read_json(jsonfile, pt);
+    boost::optional<int> ran_bin = pt.get_optional<int>("ana.ran_bin");
     boost::optional<int> ran_min = pt.get_optional<int>("ana.ran_min");
     boost::optional<int> ran_max = pt.get_optional<int>("ana.ran_max");
 
@@ -57,12 +58,12 @@ void drawResult(const std::string &resultdir, const int n) {
         wfdist[i] = new TH2F(Form("wfdist%i", i), Form("wfdist%i", i), 1024, 0,
                              1024, 150, ran_max.get()*(-1), ran_max.get());
         adcdist1d[i] = new TH1F(Form("adcdist1d%i", i), Form("adcdist1d%i", i),
-                                150, ran_min.get(), ran_max.get());
+                                ran_bin.get(), ran_min.get(), ran_max.get());
         // cut graphs
         wfdist_c[i] = new TH2F(Form("wfdist_c%i", i), Form("wfdist_C%i", i),
                                1024, 0, 1024, 150, ran_max.get()*(-1), ran_max.get());
         adcdist1d_c[i] = new TH1F(Form("adcdist1d_c%i", i),
-                                  Form("adcdist1d_c%i", i), 150, ran_min.get(), ran_max.get());
+                                  Form("adcdist1d_c%i", i), ran_bin.get(), ran_min.get(), ran_max.get());
         adcdist2d_c[i] =
             new TH2F(Form("adcdist_c%i", i), Form("adcdist_c%i", i), 150, ran_min.get(),
                      ran_max.get(), 150, -20000, 20000);
