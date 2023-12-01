@@ -29,37 +29,37 @@ else:
 SUBRUN_NAME = 'out_'+SUBRUN_NO+'.dat'
 OUT_DIR = SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+RUN_NAME
 
-def make_dir():
-    subprocess.run(['mkdir', '-p', OUT_DIR])
+def make_dir(out_dir=OUT_DIR):
+    subprocess.run(['mkdir', '-p', out_dir])
 
-def run_makeTree():
+def run_makeTree(run_name=RUN_NAME, out_dir=OUT_DIR):
     print('>>> execute makeTree.cpp')
-    data_path = SOFT_DIR+'/daq/data/'+SUB_DIR+'/'+RUN_NAME+'/'+SUBRUN_NAME
-
+    data_path = SOFT_DIR+'/daq/data/'+SUB_DIR+'/'+run_name+'/'+SUBRUN_NAME
+    print(data_path)
     macro_path = SOFT_DIR+'/ana/src/makeTree.cpp'
-    root_cmd = macro_path + '("' + data_path + '", "' + OUT_DIR +'")'
+    root_cmd = macro_path + '("' + data_path + '", "' + out_dir +'")'
     cmd = ['root', '-q', '-l', '-n', root_cmd]
     subprocess.run(cmd)
 
-def run_eventSelect():
+def run_eventSelect(out_dir=OUT_DIR):
     print('>>> execute eventSelect.cpp')
     macro_path = SOFT_DIR+'/ana/src/eventSelect.cpp'
-    root_cmd = macro_path + '("' + OUT_DIR + '")'
+    root_cmd = macro_path + '("' + out_dir + '")'
     cmd = ['root', '-q', '-l', '-n', root_cmd]
     subprocess.run(cmd)
 
-def run_drawResult():
+def run_drawResult(out_dir=OUT_DIR):
     print('>>> execute drawResult.cpp')
     macro_path = SOFT_DIR+'/ana/src/drawResult.cpp'
-    root_cmd = macro_path + '("' + OUT_DIR + '", ' + str(SUBRUN_NO) + ')'
+    root_cmd = macro_path + '("' + out_dir + '", ' + str(SUBRUN_NO) + ')'
     cmd = ['root', '-q', '-l', '-n', root_cmd]
     subprocess.run(cmd)
 
-def run_fitSpectrum():
+def run_fitSpectrum(out_dir=OUT_DIR):
     if (j['ana']['fit'] is True):
         print('>>> execute fitSpectrum.cpp')
         macro_path = SOFT_DIR+'/ana/src/fitSpectrum.cpp'
-        root_cmd = macro_path + '("' + OUT_DIR + '", '  + str(SUBRUN_NO) + ')'
+        root_cmd = macro_path + '("' + out_dir + '", '  + str(SUBRUN_NO) + ')'
         cmd = ['root', '-q', '-l', '-n', root_cmd]
         subprocess.run(cmd)
 
@@ -73,5 +73,22 @@ def run():
     run_fitSpectrum()
     print(RUN_NAME+'/'+SUBRUN_NAME+' ----> analyze COMPLETE')
 
+
+def run_all():
+    all_dir = sorted(glob.glob(SOFT_DIR+'/daq/data/'+SUB_DIR+'/*'))
+    all_subrun = [x.replace(SOFT_DIR+'/daq/data/'+SUB_DIR+'/', '') for x in sorted(all_dir)]
+    for subrun in all_subrun:
+        print(subrun+'/'+SUBRUN_NAME+' analyze START ---->')
+        make_dir(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        run_makeTree(subrun, SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        run_eventSelect(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        run_drawResult(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        run_fitSpectrum(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        print(subrun+'/'+SUBRUN_NAME+' ----> analyze COMPLETE')
+        print('==============================================')
+        
+
+
 if __name__ == "__main__":
     run()
+    # run_all()
