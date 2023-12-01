@@ -9,7 +9,7 @@ void drawResult(const std::string &resultdir, const int n) {
         return;
     }
 
-    // read json
+    // get json data
     const std::string jsonfile = Form("%s/cfg/config.json", soft_path.c_str());
     boost::property_tree::ptree pt;
     read_json(jsonfile, pt);
