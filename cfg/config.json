@@ -13,7 +13,9 @@
     "ana": {
         "ran_bin": 100,
         "ran_min": 0,
-        "ran_max": 200,
+        "ran_max": 2000,
+        "thr_ch1": 100,
+        "thr_ch2": 0,
         "fit": false,
         "fit1_min": 10,
         "fit1_max": 40,

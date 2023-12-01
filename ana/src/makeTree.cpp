@@ -1,6 +1,25 @@
 #include "inc/inc.hpp"
 
 void makeTree(const std::string &datafile, const std::string &outdirpath) {
+
+    // get soft path
+    const char *SOFT_PATH = std::getenv("ADSW");
+    std::string soft_path(std::getenv("ADSW"));
+    if (soft_path.empty()) {
+        std::cout << "ADSW environment variable is not set" << std::endl;
+        return;
+    }
+
+    // get json data
+    const std::string jsonfile = Form("%s/cfg/config.json", soft_path.c_str());
+    boost::property_tree::ptree pt;
+    read_json(jsonfile, pt);
+    boost::optional<float> thr_ch1_cfg = pt.get_optional<float>("ana.thr_ch1");
+    boost::optional<float> thr_ch2_cfg = pt.get_optional<float>("ana.thr_ch2");
+    const float thr_ch1 = thr_ch1_cfg.get();
+    const float thr_ch2 = thr_ch2_cfg.get();
+
+    // make rootfile
     TFile *file =
         new TFile(Form("%s/raw.root", outdirpath.c_str()), "recreate");
     TTree *tree = new TTree("tree", "tree");
@@ -55,7 +74,11 @@ void makeTree(const std::string &datafile, const std::string &outdirpath) {
                     adcCh2 = pedCh2 - ch2Min;
                 iadcCh1 = ch1Sum + pedCh1 * clock;
                 iadcCh2 = ch2Sum + pedCh2 * clock;
-                tree->Fill();
+                // std::cout << ch1_thr << "\t" << ch2_thr << std::endl;
+                if (adcCh1 > thr_ch1 && adcCh2 > thr_ch2){
+                    // std::cout << "adcCh1: " << adcCh1 << "\tadcCh2" << adcCh2 << std::endl;
+                    tree->Fill();
+                }
             }
             ++evtID;
             clock = 0;
