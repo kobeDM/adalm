@@ -67,9 +67,13 @@ def run_fitSpectrum(out_dir=OUT_DIR):
 def run():
     print(RUN_NAME+'/'+SUBRUN_NAME+' analyze START ---->')
     make_dir()
+    print('----------------------------------------------')
     run_makeTree()
+    print('----------------------------------------------')
     run_eventSelect()
+    print('----------------------------------------------')
     run_drawResult()
+    print('----------------------------------------------')
     run_fitSpectrum()
     print(RUN_NAME+'/'+SUBRUN_NAME+' ----> analyze COMPLETE')
 
@@ -80,9 +84,13 @@ def run_all():
     for subrun in all_subrun:
         print(subrun+'/'+SUBRUN_NAME+' analyze START ---->')
         make_dir(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        print('----------------------------------------------')
         run_makeTree(subrun, SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        print('----------------------------------------------')
         run_eventSelect(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        print('----------------------------------------------')
         run_drawResult(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
+        print('----------------------------------------------')
         run_fitSpectrum(SOFT_DIR+'/ana/result/'+SUB_DIR+'/'+subrun)
         print(subrun+'/'+SUBRUN_NAME+' ----> analyze COMPLETE')
         print('==============================================')
