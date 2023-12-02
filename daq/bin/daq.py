@@ -53,12 +53,7 @@ def run():
     ,uri
     ]
 
-    try:
-        subprocess.run(cmd)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        delete_newrun(data_dir+"/"+sub_dir+'/')
-
+    subprocess.run(cmd)
 
 def terminate_run(dir_name):
     now = datetime.now()
@@ -88,7 +83,7 @@ def delete_newrun(dir_name):
     if len(dirs) == 0:
         return
     latest_run = dirs[-1]
-    subprocess.run(['rm', '-r', dir_name+'/'+latest_run])
+    subprocess.run(['rm', '-r', latest_run])
     print('deleted', latest_run)
 
 def auto_run():
@@ -96,6 +91,7 @@ def auto_run():
         try:
             time.sleep(1)
             run()
+            delete_newrun(data_dir+"/"+sub_dir+'/')
         except KeyboardInterrupt:
             terminate_run(data_dir+'/'+sub_dir+'/')
             exit(0)
