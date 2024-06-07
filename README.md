@@ -156,3 +156,38 @@ $ source /opt/root/6_18_04/build_root/bin/thisroot.sh
 ```
 
 or input it in your .bashrc (or something like that).
+
+# SCOPY INSTALLATION
+
+Recommended to download directry from the github: 
+
+https://github.com/analogdevicesinc/scopy/releases/latest
+
+## INSTALLATION for Linux (Ubuntu 20.04 LTS)
+
+Since the instruction of the Scopy installation in Ubuntu (https://wiki.analog.com/university/tools/m2k/scopy) is actually not fully supported, the detail is described here.
+
+Firstly we have to install flatpak as the following:
+```
+$ sudo add-apt-repository ppa:alexlarsson/flatpak
+$ sudo apt update
+$ sudo apt install flatpak
+$ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+```
+
+Then, download flatpak installer from the github directly (not via flatpak tool):
+
+https://github.com/analogdevicesinc/scopy/releases/latest
+
+and unzip the zip file.
+
+Finally do install with the flatpak tool:
+```
+$ flatpak install Scopy-v1.4.1-Linux-x86-64.flatpak
+```
+(the augument depends on the scopy version)
+
+The installation will complete. You can begin with the command:
+```
+$ flatpak run org.adi.Scopy
+```
