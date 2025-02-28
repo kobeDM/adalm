@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
     //  Open ADALM2000
     // M2k *ctx = m2kOpen(("usb:%s", uri));
     M2k *ctx = m2kOpen(uri);
+    // M2k *ctx = m2kOpen("ip:192.168.2.1");
     if (!ctx) {
         std::cout << "Connection Error: No ADALM2000 device "
                      "available/connected to your PC."

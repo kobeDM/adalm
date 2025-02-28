@@ -40,3 +40,4 @@
 build
 daq/bin/daq
 .venv
+daq/data

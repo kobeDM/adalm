@@ -1,11 +1,13 @@
 #include "inc/inc.hpp"
 
-void makeTree(const std::string &datafile, const std::string &outdirpath) {
+void makeTree(const std::string &datafile, const std::string &outdirpath)
+{
 
     // get soft path
     const char *SOFT_PATH = std::getenv("ADSW");
     std::string soft_path(std::getenv("ADSW"));
-    if (soft_path.empty()) {
+    if (soft_path.empty())
+    {
         std::cout << "ADSW environment variable is not set" << std::endl;
         return;
     }
@@ -44,7 +46,8 @@ void makeTree(const std::string &datafile, const std::string &outdirpath) {
     tree->Branch("iadcCh2", &iadcCh2, "iadcCh2/F");
 
     std::ifstream ifs(datafile);
-    if (ifs.is_open() == false) {
+    if (ifs.is_open() == false)
+    {
         std::cout << "datafile input error" << std::endl;
         return;
     }
@@ -56,14 +59,21 @@ void makeTree(const std::string &datafile, const std::string &outdirpath) {
     float ch1Max = -1024, ch2Max = -1024;
     int evtID = 0;
     float ch1Sum = 0, ch2Sum = 0;
+    float ch1PedSum = 0, ch2PedSum = 0;
+    int pedClockMin = 100, pedClockMax = 200;
 
-    while (!ifs.eof()) {
+    while (!ifs.eof())
+    {
         std::string line = "";
         std::getline(ifs, line);
-        if (line.length() <= 0 || strncmp(line.c_str(), "#", 1) == 0) {
-            if (evtID != 0 && evtID % 3 == 2) {
-                pedCh1 = ch1Sum / clock;
-                pedCh2 = ch2Sum / clock;
+        if (line.length() <= 0 || strncmp(line.c_str(), "#", 1) == 0)
+        {
+            if (evtID != 0 && evtID % 3 == 2)
+            {
+                // pedCh1 = ch1Sum / clock;
+                // pedCh2 = ch2Sum / clock;
+                pedCh1 = ch1PedSum / (float)(pedClockMax - pedClockMin);
+                pedCh2 = ch2PedSum / (float)(pedClockMax - pedClockMin);
                 if (std::abs(ch1Max) > std::abs(ch1Min))
                     adcCh1 = ch1Max - pedCh1;
                 else
@@ -75,7 +85,8 @@ void makeTree(const std::string &datafile, const std::string &outdirpath) {
                 iadcCh1 = ch1Sum + pedCh1 * clock;
                 iadcCh2 = ch2Sum + pedCh2 * clock;
                 // std::cout << ch1_thr << "\t" << ch2_thr << std::endl;
-                if (adcCh1 > thr_ch1 && adcCh2 > thr_ch2){
+                if (adcCh1 > thr_ch1 && adcCh2 > thr_ch2)
+                {
                     // std::cout << "adcCh1: " << adcCh1 << "\tadcCh2" << adcCh2 << std::endl;
                     tree->Fill();
                 }
@@ -88,6 +99,8 @@ void makeTree(const std::string &datafile, const std::string &outdirpath) {
             ch2Max = -1024;
             ch1Sum = 0;
             ch2Sum = 0;
+            ch1PedSum = 0;
+            ch2PedSum = 0;
             continue;
         }
         std::stringstream ss(line);
@@ -107,6 +120,13 @@ void makeTree(const std::string &datafile, const std::string &outdirpath) {
         ch2Sum += ch2;
         wfCh1[clock] = ch1;
         wfCh2[clock] = ch2;
+
+        if (clock >= pedClockMin && clock <= pedClockMax)
+        {
+            ch1PedSum += ch1;
+            ch2PedSum += ch2;
+        }
+
         ++clock;
     }
 
