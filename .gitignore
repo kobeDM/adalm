@@ -31,13 +31,12 @@
 *.out
 *.app
 
-*.txt
-*.png
-*.dat
-*.cnf
-*.root
-.vscode
+tmp
 build
-daq/bin/daq
-.venv
-daq/data
+bin/ad_aout
+bin/ad_dout
+bin/ad_out
+bin/daq
+bin/send_bitstream
+set_voltage
+shutter_ctrl
