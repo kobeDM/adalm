@@ -33,7 +33,7 @@ $ sudo make install
 ## libm2k
 ```
 $ cd tmp
-$ git clone https://github.com/analogdevicesinc/libm2k.git
+$ git clone https://github.com/analogdevicesinc/libm2k.git --branch v0.25
 $ mkdir libm2k-build
 $ cd libm2k-build
 $ cmake ../libm2k
@@ -47,7 +47,7 @@ $ sudo make install
 $ cd ~
 $ mkdir local 
 $ cd ~/local
-$ git clone https://github.com/analogdevicesinc/libm2k.git
+$ git clone https://github.com/analogdevicesinc/libm2k.git --branch v0.25
 $ cd libm2k
 $ mkdir libm2k-build
 $ cd libm2k-build
