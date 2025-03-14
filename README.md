@@ -23,7 +23,7 @@ $ mkdir build && cd build && cmake ../ && make && sudo make install
 
 # libiio
 $ cd ~/tmp
-$ git clone https://github.com/analogdevicesinc/libiio.git
+$ git clone https://github.com/analogdevicesinc/libiio.git --branch v0.25
 $ cd libiio
 $ cmake ./
 $ make all
@@ -33,7 +33,7 @@ $ sudo make install
 ## libm2k
 ```
 $ cd tmp
-$ git clone https://github.com/analogdevicesinc/libm2k.git --branch v0.25
+$ git clone https://github.com/analogdevicesinc/libm2k.git --branch v0.6.0
 $ mkdir libm2k-build
 $ cd libm2k-build
 $ cmake ../libm2k
@@ -47,7 +47,7 @@ $ sudo make install
 $ cd ~
 $ mkdir local 
 $ cd ~/local
-$ git clone https://github.com/analogdevicesinc/libm2k.git --branch v0.25
+$ git clone https://github.com/analogdevicesinc/libm2k.git --branch v0.6.0
 $ cd libm2k
 $ mkdir libm2k-build
 $ cd libm2k-build
