@@ -1,6 +1,6 @@
 #include "../include/inc.hpp"
 
-void drawResult(const std::string &resultdir, const int n)
+void drawResult(const std::string &resultdir)
 {
     // get ADSW path
     const char *SOFT_PATH = std::getenv("ADSW");
@@ -193,8 +193,8 @@ void drawResult(const std::string &resultdir, const int n)
         tl[i]->Draw();
     }
 
-    cvs->SaveAs(Form("%s/result_%i.png", resultdir.c_str(), n));
-    cvs_c->SaveAs(Form("%s/result_c_%i.png", resultdir.c_str(), n));
+    cvs->SaveAs(Form("%s/result.png", resultdir.c_str()));
+    cvs_c->SaveAs(Form("%s/result_c.png", resultdir.c_str()));
 
     return;
 }

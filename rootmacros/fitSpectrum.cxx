@@ -89,7 +89,10 @@ void fitSpectrum(const std::string resultdir, const int n)
             histSp[0]->Fill(adcCh1);
             if (bool1 == true)
             {
-                histSp[1]->Fill(adcCh1);
+                if (adcCh1 == 15 || adcCh1 == 28 || adcCh1 == 41)
+                    continue;
+                else
+                    histSp[1]->Fill(adcCh1);
             }
         }
         else
@@ -148,9 +151,9 @@ void fitSpectrum(const std::string resultdir, const int n)
 
     // save
     if (ch.get() == 1)
-        cvs->SaveAs(Form("%s/fitSpectrumCh1_%i.png", resultdir.c_str(), n));
+        cvs->SaveAs(Form("%s/fitSpectrumCh1.png", resultdir.c_str()));
     else
-        cvs->SaveAs(Form("%s/fitSpectrumCh2_%i.png", resultdir.c_str(), n));
+        cvs->SaveAs(Form("%s/fitSpectrumCh2.png", resultdir.c_str()));
 
     return;
 }

@@ -2,7 +2,6 @@
 
 void makeTree(const std::string &datafile, const std::string &outdirpath)
 {
-
     // get soft path
     const char *SOFT_PATH = std::getenv("ADSW");
     std::string soft_path(std::getenv("ADSW"));

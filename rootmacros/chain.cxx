@@ -1,17 +1,19 @@
 #include "inc/inc.hpp"
 
-void chain(const std::string &dirpath) {
-    TFile *file =
-        new TFile(Form("%s/rawSub.root", dirpath.c_str()), "recreate");
+void chain(const std::string &dirpath)
+{
+    TFile *file = new TFile(Form("%s/rawChain.root", dirpath.c_str()), "RECREATE");
     TChain *tree = new TChain("tree", "tree");
 
     std::ifstream ifs(Form("%s/chain.txt", dirpath.c_str()));
-    if (ifs.is_open() == false) {
+    if (ifs.is_open() == false)
+    {
         std::cout << "rootfile list not found" << std::endl;
         return;
     }
 
-    while (!ifs.eof()) {
+    while (!ifs.eof())
+    {
         std::string line = "";
         std::getline(ifs, line);
         // std::cout << line << std::endl;
