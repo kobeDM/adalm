@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         //return -1;
   //}
   printf("ad_out: ADALM2000 output sample program\n");
-  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] [-f rate(Hz) (for aout)] [-n num of pulses (for aout with -f)] [-l (digital-latchup)] [-m (digital-latchdown)] \n");
+  printf("ad_out [-h || -help] [-a || -d (analog or digital output andlog is default)] [-u || -URI device_URI] [-s || --SN] [-v||--V1 V] [-t||--T1 nsec] [--V2 V] [--T2 nsec] [--sawwave_ch1 ] [--sawwave_ch2] [-f rate(Hz) (for aout)] [-n num of pulses (for aout with -f)] [-l (digital-latchup)] [-m (digital-latchdown)] \n");
   int hopt = 0;
   int sopt = 0;
   int uopt = 0;
@@ -64,23 +64,29 @@ int main(int argc, char* argv[])
   char *dparam = NULL;
   struct option longopts[] = {
       { "ANALOG",    no_argument,       NULL, 'a' },
+      { "sawwave_ch1",  no_argument, NULL, 'b' },
+      { "sawwave_ch2",  no_argument, NULL, 'c' },
+      { "DIGITAL", no_argument, NULL, 'd' },
+      { "FREQ", required_argument, NULL, 'f' },
+      { "help", no_argument, NULL, 'h' },
+       { "DIGITAL_LATCHUP", no_argument, NULL, 'l' },
+      { "DIGITAL_LATCHDOWN", no_argument, NULL, 'm' },
+      { "NUM_OF_PULSES", required_argument, NULL, 'n' },
+      { "T2",  required_argument, NULL, 'r' },
       { "SN",    no_argument,       NULL, 's' },
       { "T1",  required_argument, NULL, 't' },
-      { "T2",  required_argument, NULL, 'r' },
+      { "URI",  required_argument, NULL, 'u' },
       { "V1",  required_argument, NULL, 'v' },
       { "V2",  required_argument, NULL, 'w' },
-      { "URI",  required_argument, NULL, 'u' },
-      { "DIGITAL", no_argument, NULL, 'd' },
-      { "DIGITAL_LATCHUP", no_argument, NULL, 'l' },
-      { "DIGITAL_LATCHDOWN", no_argument, NULL, 'm' },
-      { "FREQ", required_argument, NULL, 'f' },
-      { "NUM_OF_PULSES", required_argument, NULL, 'n' },
-      { "help", no_argument, NULL, 'h' },
       { 0,        0,                 0,     0  },
   };
   int opt;
   int longindex;
   int numopt=0;
+  int sawopt[2];
+  for (int i=0;i<2;i++){
+    sawopt[i]=0;
+  }
   while ((opt = getopt_long(argc, argv, "mlhadsu:t:v:r:w:f:n:", longopts, &longindex)) != -1) {
     //    printf("%d %s\n", longindex, longopts[longindex].name);
     switch (opt) {
@@ -151,6 +157,14 @@ int main(int argc, char* argv[])
       numofpulses=(atoi)(optarg);
       numopt++;
       break;
+    case 'b':
+      sawopt[0]=1;
+      numopt++;
+      break;      
+    case 'c':
+      sawopt[1]=1;
+      numopt++;
+      break;
     default:
       printf("error! \'%c\' \'%c\'\n", opt, optopt);
       return 1;
@@ -171,6 +185,8 @@ int main(int argc, char* argv[])
   } 
   if(aopt){
     cout <<"**** Analog output mode is selected. ****"<<endl;
+    if(sawopt[0])    cout <<"\t (ch1 sawwwave)"<<endl;
+    if(sawopt[1])    cout <<"\t (ch2 sawwwave)"<<endl;
     dopt=0;
   }
   if(dopt){
@@ -373,17 +389,31 @@ int main(int argc, char* argv[])
       for(int i=0;i<C[0];i++)
 	pulse_0.push_back(0);
       for(int i=C[0];i<2*C[0];i++)
-	pulse_0.push_back(V[0]);
+	if(sawopt[0]){
+	  pulse_0.push_back(V[0]*((double)(2*C[0]-i)/C[0]));//sawwave
+	}
+	else{
+	  pulse_0.push_back(V[0]);
+	}
       for(int i=2*C[0];i<3*C[0];i++)
 	pulse_0.push_back(0);
-      for(int i=0;i<C[1];i++)
-	pulse_1.push_back(0);
-      for(int i=C[1];i<2*C[1];i++)
+	
+      
+      for(int i=0;i<C[1];i++){
+	  pulse_1.push_back(0);
+      }
+      for(int i=C[1];i<2*C[1];i++){
+	if(sawopt[1]){
+	  pulse_1.push_back(V[1]*((double)(2*C[1]-i)/C[1]));//sawwave
+	}
+	else{
 	pulse_1.push_back(V[1]);
-      for(int i=2*C[1];i<3*C[1];i++)
+	}
+      }
+      for(int i=2*C[1];i<3*C[1];i++){
 	pulse_1.push_back(0);
-
-    
+	}
+ 
     //	for(int i=0;i<1024;i++)
 	//	{
 	  //	  double rad = 2*M_PI*(i/1024.0);
@@ -405,18 +435,20 @@ int main(int argc, char* argv[])
     if(nopt)printf("%d pulses ",(int)numofpulses);
     if(fopt)printf("repeting at %d Hz.",(int)rate);
     printf("\n");
-    //	aout->setCyclic(true);
     aout->setCyclic(false);
-	//aout->push({sinv,saw});
-		//aout->push({saw,sinv});
-	//aout->push(0,sinv);
-	//	aout->push({pulse_0,pulse_1});
+      //}
+    //aout->push({sinv,saw});
+    //aout->push({saw,sinv});
+    //aout->push(0,sinv);
+    //	aout->push({pulse_0,pulse_1});
     //    aout->enableChannel(0, true);
     //aout->enableChannel(1, true);
+    
     aout->push(0,pulse_0);
     aout->push(1,pulse_1);
     
     pulse_done=1;
+
     while(fopt){    
       usleep(int(1e6/rate));
       aout->push(0,pulse_0);
