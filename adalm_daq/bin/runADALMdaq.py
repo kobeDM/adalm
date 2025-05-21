@@ -49,8 +49,8 @@ while True:
         print( 'create data store directory: ' + per_dir )
         subprocess.run( ['mkdir', '-p', per_dir ] )
 
-        print( 'copy config file to the data store directory (rename to per{:0=4}.xml'.format( per_num ) )
-        subprocess.run( ['cp', config_filename, per_dir + '/per{:0=4}.xml'.format( per_num ) ] )
+        print( 'copy config file to the data store directory (rename to per{:0=4}.json'.format( per_num ) )
+        subprocess.run( ['cp', config_filename, per_dir + '/per{:0=4}.json'.format( per_num ) ] )
         break
 
               
