@@ -1,4 +1,4 @@
 DIR=`pwd`
-echo "adalm package: ${DIR} is set"
-export ADALM_DIR=${DIR}
-export PATH=${ADALM_DIR}/bin:${PATH}
+echo "adalm daq package: ${DIR} is set"
+export ADALM_DAQ_DIR=${DIR}
+export PATH=${ADALM_DAQ_DIR}/bin:${PATH}
