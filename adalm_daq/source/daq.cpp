@@ -3,7 +3,8 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
+// #include <sys/time.h>
+#include <time.h>
 #include <math.h>
 #include <libm2k/m2k.hpp>
 #include <libm2k/contextbuilder.hpp>
@@ -21,10 +22,6 @@ using namespace libm2k::context;
 
 int main(int argc, char* argv[])
 {
-	
-	//timestamp
-	struct timeval tv;
-
 	if(argc!=10){
 		printf("./main [outfileheader] [sub_entries] [sampling_rate(Hz)] [sampling_number] [dynamic range 0(+/-25V) or 1(+/-2.5V)] [ch1 Vth(V)] [ch2 Vth(V)] [trigger source 0(ch1) or 1(ch2) or 2(or)] [Trig Edge RISE=0 or FALL=1]\n");
 		printf("ex) daq out 1000 1000000 1024 2 0.1 0.1 2 0\n");
@@ -33,16 +30,15 @@ int main(int argc, char* argv[])
 	
 	//----------------------------
 	//  configure
-	const char* fheader = argv[1];
-	int sub_entries = atoi(argv[2]);	
-	double sampling_rate = double(atof(argv[3]));	
-	double sampling_num = atoi(argv[4]);	
-	//double dynamic_range = double(atof(argv[5])); // V	
-	int dynamic_range = atoi(argv[5]); // V	
-	double Vth1 = double(atof(argv[6])); // V (TRIGGER THRESHOLD)	
-	double Vth2 = double(atof(argv[7])); // V	(TRIGGER THRESHOLD)
-	int trigger_source = atoi(argv[8]);
-	int trig_edge = atoi(argv[9]);
+	const char* fheader        = argv[1];
+	int         sub_entries    = atoi(argv[2]);	
+	double      sampling_rate  = double(atof(argv[3]));	
+	double      sampling_num   = atoi(argv[4]);	
+	int         dynamic_range  = atoi(argv[5]);
+	double      Vth1           = double(atof(argv[6]));
+	double      Vth2           = double(atof(argv[7]));
+	int         trigger_source = atoi(argv[8]);
+	int         trig_edge      = atoi(argv[9]);
 
 	//----------------------------
 	//  Open ADALM2000
@@ -70,13 +66,10 @@ int main(int argc, char* argv[])
 	ain->setSampleRate(sampling_rate);
 	ain->setRange((ANALOG_IN_CHANNEL)0,(M2K_RANGE)dynamic_range);
 	ain->setRange((ANALOG_IN_CHANNEL)1,(M2K_RANGE)dynamic_range);
-	//ain->setRange((ANALOG_IN_CHANNEL)0,-dynamic_range,dynamic_range);
-	//ain->setRange((ANALOG_IN_CHANNEL)1,-dynamic_range,dynamic_range);
 
 #ifdef TRIGGERING
 	// setup analog trigger
 	trig->setAnalogSource((M2K_TRIGGER_SOURCE_ANALOG)trigger_source);
-	//trig->setAnalogSource(CHANNEL_1_OR_CHANNEL_2);
 	trig->setAnalogDelay(-int(sampling_num/2));
 	// set CH1 trigger
 	trig->setAnalogCondition(0,(M2K_TRIGGER_CONDITION_ANALOG)trig_edge);
@@ -88,30 +81,7 @@ int main(int argc, char* argv[])
 	trig->setAnalogMode(1,ANALOG);
 #endif
 
-/*/ for test
-	// setup analog output
-	aout->setSampleRate(0,750000);
-	aout->setSampleRate(1,750000);
-	aout->enableChannel(0, true);
-	aout->enableChannel(1, true);
-	// create output buffers
-	vector<double> sinv;
-	vector<double> saw;
-	for(int i=0;i<1024;i++)
-	{
-		double rad = 2*M_PI*(i/1024.0);
-		double val = 1.*sin(rad);
-		sinv.push_back(val);
-		saw.push_back((0*i)/1024.0);
-	}
-	aout->setCyclic(true);
-	aout->push({sinv,saw});
-	//aout->push({saw,sinv});
-*/
-
-
 	string strfheader = fheader;
-	//string fname = strfheader + ".dat";
 	string fname = strfheader;
 	string fconfname = strfheader + ".cnf";
 	printf("-------- SETTING CONFIGURE --------\n");
@@ -143,29 +113,34 @@ int main(int argc, char* argv[])
 
 	int trigger_num = 0;
 	int subrun_num = 0;
-	gettimeofday(&tv,NULL);
-	fprintf(fconf,"RUN START : timestamp %ld.%06lu\n",tv.tv_sec,tv.tv_usec);
+
+	//timestamp
+	struct timespec tspec;
+    double event_rate = 0.0;
+    double rate_start = 0.0;
+    clock_gettime( CLOCK_REALTIME, &tspec );
+	fprintf(fconf,"RUN START : timestamp %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
 	fflush(fconf);
-	printf(" RUN START : timestamp %ld.%06lu\n",tv.tv_sec,tv.tv_usec);
+	printf(" RUN START : timestamp %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
 	while(true){
 		//file close/open
 		if(trigger_num%sub_entries==0){
 			if(trigger_num != 0){
 				fclose(ofile);
-				gettimeofday(&tv,NULL);
-				fprintf(fconf,"SUBRUN%d END   : timestamp %ld.%06lu\n",subrun_num,tv.tv_sec,tv.tv_usec);
+                clock_gettime( CLOCK_REALTIME, &tspec );
+				fprintf(fconf,"SUBRUN%d END   : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
 				fflush(fconf);
-				printf("\nSUBRUN%d END   : timestamp %ld.%06lu\n",subrun_num,tv.tv_sec,tv.tv_usec);
+				printf("\nSUBRUN%d END   : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
 				subrun_num++;
 			}
 			std::stringstream ss;
 			ss << fname << "_" << subrun_num << ".dat";
 			ofile = fopen(ss.str().c_str(),"w");
-			gettimeofday(&tv,NULL);
-			fprintf(fconf,"SUBRUN%d START : timestamp %ld.%06lu\n",subrun_num,tv.tv_sec,tv.tv_usec);
+            clock_gettime( CLOCK_REALTIME, &tspec );
+			fprintf(fconf,"SUBRUN%d START : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
 			fflush(fconf);
-			printf("\nSUBRUN%d START : timestamp %ld.%06lu\n",subrun_num,tv.tv_sec,tv.tv_usec);
-			if(ofile == NULL){
+			printf("\nSUBRUN%d START : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
+			if(ofile == nullptr){
 				printf("cannot open file .\n");
 				return -1;
 			}
@@ -173,34 +148,32 @@ int main(int argc, char* argv[])
 
 		ain->startAcquisition(sampling_num);
 		auto data = ain->getSamplesRaw(sampling_num);
-		printf("\rTRIGGER NUM : %d",trigger_num);
+        clock_gettime( CLOCK_REALTIME, &tspec );
+
+        if( trigger_num % 10 == 0 ) {
+            double rate_now = static_cast< double >( tspec.tv_sec ) + (static_cast< double >( tspec.tv_nsec ) * 0.000000001);
+            if( trigger_num != 0 )
+                event_rate = 10.0 / ( rate_now - rate_start );
+            rate_start = rate_now;
+        }
+        
+        printf("\rTRIGGER NUM : %d,    REALTIME RATE : %.2lf Hz",trigger_num, event_rate);
 		fflush(stdout);
-		gettimeofday(&tv,NULL);
-		fprintf(ofile,"#Ev. %d %ld.%06lu\n",trigger_num,tv.tv_sec,tv.tv_usec);
+		fprintf(ofile,"#Ev. %d %ld.%06lu\n",trigger_num,tspec.tv_sec,tspec.tv_nsec);
 		fprintf(ofile,"#CH1 CH2\n");
 		for(int samp=0;samp<sampling_num;samp++){
 			fprintf(ofile ,"%.0lf %.0lf\n",data[0][samp],data[1][samp]);
 		}
-		/*
-		for(double val : data[0])
-		{
-			fprintf(ofile,"%.0lf\n",val);
-		}
-		fprintf(ofile,"CH2\n");
-		for(double val : data[1])
-		{
-			fprintf(ofile,"%.0lf\n",val);
-		}
-		*/
-		gettimeofday(&tv,NULL);
-		fprintf(ofile,"#Write %ld.%06lu\n",tv.tv_sec,tv.tv_usec);
+
+        clock_gettime( CLOCK_REALTIME, &tspec );
+		fprintf(ofile,"#Write %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
 		fflush(ofile);
 		ain->stopAcquisition();
 		trigger_num++;
 	};
-	gettimeofday(&tv,NULL);
-	printf("\nRUN END   : timestamp %ld.%06lu\n",tv.tv_sec,tv.tv_usec);
-	fprintf(fconf,"\nRUN END   : timestamp %ld.%06lu\n",tv.tv_sec,tv.tv_usec);
+    clock_gettime( CLOCK_REALTIME, &tspec );
+	printf("\nRUN END   : timestamp %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
+	fprintf(fconf,"\nRUN END   : timestamp %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
 	
 	fclose(ofile);
 	fclose(fconf);

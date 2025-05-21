@@ -1,0 +1,12 @@
+{
+        "data_dir"        : "/home/msgc/KUBEAM/20250520/",
+        "file_header"     : "ADALM",
+        "sub_entries"     : 1000,
+        "sampling_rate"   : 100000000.0,
+        "sampling_depth"  : 1024,
+        "dynamic_range"   : 1,
+        "trigger_Vth_ch1" : -0.01,
+        "trigger_Vth_ch2" : -0.01,
+        "trigger_src"     : 2,
+        "trigger_type"    : 0
+}

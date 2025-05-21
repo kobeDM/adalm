@@ -6,71 +6,106 @@ import numpy
 import glob
 import time
 from datetime import datetime
+import argparse
+import json
 
+ADALM_DIR = os.environ['ADALM_DIR']+'/'
+daq_cmd = ADALM_DIR + '/bin/daq'
 
-if(len(sys.argv)!=2):
-	print('Usage : ./runADALMdaq.py [run name]')
-	exit(0)
+parser = argparse.ArgumentParser(description='ADALM DAQ TOOL')
+parser.add_argument('-c', '--config', default='default_config',
+                    help='Config json filename with path')
 
-data_header = sys.argv[1]
-print(data_header+' run START ---->')
+args = parser.parse_args()
+if args.config == 'default_config':
+        config_filename = ADALM_DIR + 'default_config.json'
+else:
+        config_filename = args.config
 
+if os.path.exists(config_filename):
+        pass
+else:
+        print('config file ' + config_filename + ' is not exist...')
+        exit()
 
-## User Edit ## DATA DIRECTORY LOCATION ##
+print('Use config file: ' + config_filename)
 
-data_dir = '/home/pi/adalm2000/data/test_data/data/' # with the last slash
-sub_dir = '20201005'
+with open(config_filename) as f:
+        config = json.load(f)
+        if config['data_dir'][-1] != '/':
+              config['data_dir'] = config['path'] + '/'
 
+data_dir = config['data_dir']
+
+# find the latest period
+per_num = 1
+per_dir = data_dir # temp
+while True:
+        per_dir = data_dir + '/per{:0=4}'.format( per_num )
+        if os.path.exists( per_dir ):
+                per_num += 1
+                continue
+        
+        print( 'create data store directory: ' + per_dir )
+        subprocess.run( ['mkdir', '-p', per_dir ] )
+
+        print( 'copy config file to the data store directory (rename to per{:0=4}.xml'.format( per_num ) )
+        subprocess.run( ['cp', config_filename, per_dir + '/per{:0=4}.xml'.format( per_num ) ] )
+        break
+
+              
 ##########################################
 
+## User Edit ## DAQ CONFIGURATION ##
 
+sub_entries     = config['sub_entries']     # the number of entries per file
+sampling_rate   = config['sampling_rate']   # max 100000000 Hz ( 10 ns per clock )
+sampling_depth  = config['sampling_depth']  # default: 1024
+dynamic_range   = config['dynamic_range']   # 0 ( +/- 25V ) or 1 ( +/-2.5V )
+trigger_Vth_ch1 = config['trigger_Vth_ch1'] # Unit: [V], both polarity is allowed
+trigger_Vth_ch2 = config['trigger_Vth_ch2'] # Unit: [V], both polarity is allowed
+trigger_src     = config['trigger_src']     # 0 ( ch1 ) or 1 ( ch2 ) or 2 ( ch1 || ch2 )
+trigger_type    = config['trigger_type']    # 0 ( rise edge ) or 1 ( fall edge )
+
+print( '' )
+print( '=============================================================================' )
+print( '                              Kobe DM ADALM DAQ                              ' )
+print( '=============================================================================' )
+print( '' )
+
+print( 'Directory for data storage: ' + data_dir )
+print( 'Run period: per{:0=4}'.format( per_num ) )
+print( 'Run type: ' + config['file_header']  )
+
+print( '' )
+print( '' )
+
+print( '***  DAQ START  (' + config['file_header'] + ' Run) ***' )
+
+print( '' )
+print( '' )
 
 def run():
-
-	## User Edit ## DAQ CONFIGURATION ##
-
-	subentries = 1000  # per 1 subrun entries
-	sampling_rate = 100000000.0 # max 100000000 (Hz) 1colck=10ns
-	sampling_num = 1024 #
-	dynamic_range = 1 # 0(+/-25V) or 1(+/-2.5V)
-	trigger_Vth_1ch = -0.01 # V
-	trigger_Vth_2ch = -0.01 # V
-	trigger_src = 2 # 'ch1=0' or 'ch2=1' or 'or-trig=2'
-	trigger_type = 1 # 'rise=0' or 'fall=1'
-
-	daq_cmd = '/home/pi/adalm2000/adalm_daq/bin/daq' # daq cmd full path
-	
-	####################################
-
-
-
-	subprocess.run(['mkdir', '-p', data_dir+sub_dir ])
-
-	subrun_name = find_newrun(data_dir+sub_dir+'/')
-
-	cmd = [daq_cmd
-	,data_dir+sub_dir + '/' + subrun_name + '/' + data_header
-	,str(subentries)
+	cmd = [ daq_cmd
+	,per_dir + '/' + config['file_header']
+	,str(sub_entries)
 	,str(sampling_rate)
-	,str(sampling_num)
+	,str(sampling_depth)
 	,str(dynamic_range)
-	,str(trigger_Vth_1ch)
-	,str(trigger_Vth_2ch)
+	,str(trigger_Vth_ch1)
+	,str(trigger_Vth_ch2)
 	,str(trigger_src)
 	,str(trigger_type)
 	]
 
-	#print_cmd(cmd)
+	# print_cmd(cmd)
 	subprocess.run(cmd)
 
 
-def terminate_run(dir_name):
+def terminate_run():
 	now = datetime.now()
 	print('\nRUN END   : '+str(datetime.timestamp(now)))
-	dirs = glob.glob(dir_name+"per????")
-	dirs.sort(reverse=True)
-	subrun_dir = dir_name+'/per'+str(int(len(dirs)-1)).zfill(4)
-	with open(subrun_dir+'/'+data_header+'.cnf','a') as of:
+	with open( per_dir + '/' + config['file_header'] + '.cnf', 'a' ) as of:
 		of.write('RUN END   : '+str(datetime.timestamp(now)))
 
 
@@ -79,30 +114,13 @@ def print_cmd(cmd):
 		print(c, end=' ')
 		print()
 
-
-def find_newrun(dir_name):
-	#dirs = os.listdir(dir_name)
-	dirs = glob.glob(dir_name+"per????")
-	if len(dirs) == 0:
-		subrun_dir = dir_name+'/per'+'0'.zfill(4)
-		subprocess.run(['mkdir','-p',subrun_dir])
-		print('per'+'0'.zfill(4) + '/' + data_header)
-		return 'per'+'0'.zfill(4)
-	else:
-		dirs.sort(reverse=True)
-		subrun_dir = dir_name+'/per'+str(int(len(dirs))).zfill(4)
-		subprocess.run(['mkdir','-p',dir_name+'/per'+str(int(len(dirs))).zfill(4)])
-		#return data_header+str(int(files[0][num_pos+3:num_pos+3+4])+1)
-		return "per" + str(int(len(dirs))).zfill(4)
-
-
 def auto_run():
 	while(True):
 		try:
 			run()
 			time.sleep(1)
 		except KeyboardInterrupt:
-			terminate_run(data_dir+sub_dir+'/')
+			terminate_run()
 			exit(0)
 
 if __name__ == '__main__':
