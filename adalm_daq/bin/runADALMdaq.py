@@ -66,6 +66,9 @@ trigger_Vth_ch1 = config['trigger_Vth_ch1'] # Unit: [V], both polarity is allowe
 trigger_Vth_ch2 = config['trigger_Vth_ch2'] # Unit: [V], both polarity is allowed
 trigger_src     = config['trigger_src']     # 0 ( ch1 ) or 1 ( ch2 ) or 2 ( ch1 || ch2 )
 trigger_type    = config['trigger_type']    # 0 ( rise edge ) or 1 ( fall edge )
+tp_mode         = config['tp_mode']         # 0 ( test pulse mode: OFF ), 1 ( test pulse mode: ON)
+tp_rate         = config['tp_rate']         # test pulse rate [Hz], default is 50 Hz
+tp_amplitude    = config['tp_amplitude']    # test pulse amplitude [V]
 
 print( '' )
 print( '=============================================================================' )
@@ -96,6 +99,9 @@ def run():
 	,str(trigger_Vth_ch2)
 	,str(trigger_src)
 	,str(trigger_type)
+	,str(tp_mode)
+	,str(tp_rate)
+	,str(tp_amplitude)
 	]
 
 	# print_cmd(cmd)

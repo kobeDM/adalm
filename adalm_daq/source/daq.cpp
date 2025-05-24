@@ -20,11 +20,13 @@ using namespace libm2k::context;
 // uncomment the following definition to test triggering
 #define TRIGGERING
 
+const double MAX_SAMPLE_RATE = 100000000.0;
+
 int main(int argc, char* argv[])
 {
-	if(argc!=10){
-		printf("./main [outfileheader] [sub_entries] [sampling_rate(Hz)] [sampling_number] [dynamic range 0(+/-25V) or 1(+/-2.5V)] [ch1 Vth(V)] [ch2 Vth(V)] [trigger source 0(ch1) or 1(ch2) or 2(or)] [Trig Edge RISE=0 or FALL=1]\n");
-		printf("ex) daq out 1000 1000000 1024 2 0.1 0.1 2 0\n");
+	if(argc!=13){
+		printf("./main [outfileheader] [sub_entries] [sampling_rate(Hz)] [sampling_number] [dynamic range 0(+/-25V) or 1(+/-2.5V)] [ch1 Vth(V)] [ch2 Vth(V)] [trigger source 0(ch1) or 1(ch2) or 2(or)] [Trig Edge RISE=0 or FALL=1] [Test pulse mode] [Test pulse rate] [Test pulse amplitude]\n");
+		printf("ex) daq out 1000 1000000 1024 2 0.1 0.1 2 0 10.0 0.1\n");
 		return -1;
 	}
 	
@@ -39,7 +41,10 @@ int main(int argc, char* argv[])
 	double      Vth2           = double(atof(argv[7]));
 	int         trigger_source = atoi(argv[8]);
 	int         trig_edge      = atoi(argv[9]);
-
+    int         tp_mode        = atoi(argv[10]);
+    double      tp_rate        = double(atof(argv[11]));
+    double      tp_amplitude   = double(atof(argv[12]));
+    
 	//----------------------------
 	//  Open ADALM2000
 	M2k *ctx = m2kOpen();
@@ -67,6 +72,26 @@ int main(int argc, char* argv[])
 	ain->setRange((ANALOG_IN_CHANNEL)0,(M2K_RANGE)dynamic_range);
 	ain->setRange((ANALOG_IN_CHANNEL)1,(M2K_RANGE)dynamic_range);
 
+    // Setup analog out (for test pulse)
+    if( tp_mode == 1 ) {
+        aout->enableChannel( 0, tp_mode );
+        aout->enableChannel( 1, tp_mode );
+        aout->setSampleRate( 0, MAX_SAMPLE_RATE ); // set to max sampling rate (100MHz) for technical reason
+        aout->setSampleRate( 1, MAX_SAMPLE_RATE ); // set to max sampling rate (100MHz) for technical reason
+        aout->setCyclic( true );
+
+        // create testpulse (need to create enough buffer for hardware requirement)
+        std::vector< double > testpulse;
+        int max_cyclic_idx = static_cast< int >( MAX_SAMPLE_RATE / tp_rate * 0.5 );
+        for( int cyclic_idx = 0; cyclic_idx < max_cyclic_idx; ++cyclic_idx )
+            testpulse.push_back( tp_amplitude );
+        for( int cyclic_idx = 0; cyclic_idx < max_cyclic_idx; ++cyclic_idx )
+            testpulse.push_back( 0 );
+
+        std::cout << testpulse.size( ) << std::endl;
+        aout->push( 0, testpulse );
+        aout->push( 1, testpulse );
+    }
 #ifdef TRIGGERING
 	// setup analog trigger
 	trig->setAnalogSource((M2K_TRIGGER_SOURCE_ANALOG)trigger_source);
