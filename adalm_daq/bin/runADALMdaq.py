@@ -9,7 +9,7 @@ from datetime import datetime
 import argparse
 import json
 
-ADALM_DIR = os.environ['ADALM_DIR']+'/'
+ADALM_DIR = os.environ['ADALM_DAQ_DIR']+'/'
 daq_cmd = ADALM_DIR + '/bin/daq'
 
 parser = argparse.ArgumentParser(description='ADALM DAQ TOOL')
