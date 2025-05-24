@@ -16,7 +16,6 @@ void DrawWaveformMulti( const String& filenameList, const String& outputDir )
         fileList.push_back( filePath );
     }
     
-
     // setup histogram
     TH2F histWFCh1("histWFCh1","histWFCh1",1024,0,1024,100,-100,100);
     TH2F histWFCh2("histWFCh2","histWFCh2",1024,0,1024,100,-100,100);
@@ -64,29 +63,29 @@ void DrawWaveformMulti( const String& filenameList, const String& outputDir )
             else if( ch2 > ch2Max ) ch2Max = ch2;
         
             histWFCh1.Fill(clock, ch1);
-            histWFCh1.Fill(clock, ch2);
+            histWFCh2.Fill(clock, ch2);
             ++clock;
         }
     }
-    String outname = ShUtil::GetFileName(ShUtil::ExtractPathWithoutExt( filenameList ));
-    TCanvas cvs("cvs","cvs",800,600);
-    
-    histSpCh1.GetXaxis()->SetTitle("ADC count");
-    histSpCh1.GetYaxis()->SetTitle("Entries");
-    histSpCh1.Draw("colz");
-    
-    cvs.SaveAs( Form( "%s/%s_spch1.png", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_spch1.pdf", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_spch1.eps", outputDir.c_str( ), outname.c_str() ) );
 
-    histSpCh2.GetXaxis()->SetTitle("ADC count");
-    histSpCh2.GetYaxis()->SetTitle("Entries");
+    TCanvas cvs("cvs","cvs",1600,1200);
+    cvs.Divide( 2, 2 );
+
+    cvs.cd( 1 );
+    histSpCh1.GetXaxis()->SetTitle("ADC_{max} - ADC_{min}");
+    histSpCh1.GetYaxis()->SetTitle("Events");
+    histSpCh1.Draw("colz");
+
+    ShTUtil::CreateDrawText( 0.7, 0.85, "Channel 1" );
+    
+    cvs.cd( 2 );
+    histSpCh2.GetXaxis()->SetTitle("ADC_{max} - ADC_{min}");
+    histSpCh2.GetYaxis()->SetTitle("Events");
     histSpCh2.Draw("colz");
+
+    ShTUtil::CreateDrawText( 0.7, 0.85, "Channel 2" );
     
-    cvs.SaveAs( Form( "%s/%s_spch2.png", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_spch2.pdf", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_spch2.eps", outputDir.c_str( ), outname.c_str() ) );
-    
+    cvs.cd( 3 );
     const Int_t NRGBs = 5;
     const Int_t NCont = 255;
 
@@ -98,23 +97,28 @@ void DrawWaveformMulti( const String& filenameList, const String& outputDir )
     gStyle->SetNumberContours( NCont );
     gPad->SetRightMargin( 0.2 );
 
-    histWFCh1.GetXaxis()->SetTitle("clock [10 MHz sampling]");
+    histWFCh1.GetXaxis()->SetTitle("clock [100 MHz sampling]");
     histWFCh1.GetYaxis()->SetTitle("ADC count");
     histWFCh1.GetZaxis()->SetTitle("Entries");
     histWFCh1.Draw("colz");
-    
-    cvs.SaveAs( Form( "%s/%s_wfch1.png", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_wfch1.pdf", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_wfch1.eps", outputDir.c_str( ), outname.c_str() ) );
 
-    histWFCh2.GetXaxis()->SetTitle("clock [10 MHz sampling]");
+    ShTUtil::CreateDrawText( 0.6, 0.85, "Channel 1" );
+    
+    cvs.cd( 4 );
+    TColor::CreateGradientColorTable( NRGBs, stops, red, green, blue, NCont );
+    gStyle->SetNumberContours( NCont );
+    gPad->SetRightMargin( 0.2 );
+
+    histWFCh2.GetXaxis()->SetTitle("clock [100 MHz sampling]");
     histWFCh2.GetYaxis()->SetTitle("ADC count");
     histWFCh2.GetZaxis()->SetTitle("Entries");
     histWFCh2.Draw("colz");
     
-    cvs.SaveAs( Form( "%s/%s_wfch2.png", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_wfch2.pdf", outputDir.c_str( ), outname.c_str() ) );
-    cvs.SaveAs( Form( "%s/%s_wfch2.eps", outputDir.c_str( ), outname.c_str() ) );
+    ShTUtil::CreateDrawText( 0.6, 0.85, "Channel 2" );
+
+    cvs.SaveAs( Form( "%s/wfsp.png", outputDir.c_str( ) ) );
+    cvs.SaveAs( Form( "%s/wfsp.pdf", outputDir.c_str( ) ) );
+    cvs.SaveAs( Form( "%s/wfsp.eps", outputDir.c_str( ) ) );
     
     return;
 }
