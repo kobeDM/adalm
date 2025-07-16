@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+#result
+adalm/analyzer/root_macro/result
