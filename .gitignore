@@ -32,4 +32,7 @@
 *.app
 
 #result
-adalm/analyzer/root_macro/result
+adalm/analyzer/root_macro/result/
+*.eps
+*.pdf
+*.png
