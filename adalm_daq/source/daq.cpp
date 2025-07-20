@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 	//timestamp
 	struct timespec tspec;
     double event_rate = 0.0;
-    double rate_start = 0.0;
+    double rate_time_start = 0.0;
     clock_gettime( CLOCK_REALTIME, &tspec );
 	fprintf(fconf,"RUN START : timestamp %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
 	fflush(fconf);
@@ -176,10 +176,10 @@ int main(int argc, char* argv[])
         clock_gettime( CLOCK_REALTIME, &tspec );
 
         if( trigger_num % 10 == 0 ) {
-            double rate_now = static_cast< double >( tspec.tv_sec ) + (static_cast< double >( tspec.tv_nsec ) * 0.000000001);
+            double rate_time_now = static_cast< double >( tspec.tv_sec ) + (static_cast< double >( tspec.tv_nsec ) * 0.000000001);
             if( trigger_num != 0 )
-                event_rate = 10.0 / ( rate_now - rate_start );
-            rate_start = rate_now;
+                event_rate = 10.0 / ( rate_time_now - rate_time_start );
+            rate_time_start = rate_time_now;
         }
         
         printf("\rTRIGGER NUM : %d,    REALTIME RATE : %.2lf Hz",trigger_num, event_rate);
