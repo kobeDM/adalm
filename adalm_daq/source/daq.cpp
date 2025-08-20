@@ -1,5 +1,7 @@
 #define _USE_MATH_DEFINES
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
@@ -134,37 +136,61 @@ int main(int argc, char* argv[])
 	fprintf(fconf,"TRIGGER EDGE (R=0,F=1) : %d\n",        trig_edge);
 	fprintf(fconf,"-----------------------------------\n");
 
-	FILE* ofile;
-
-	int trigger_num = 0;
-	int subrun_num = 0;
 
 	//timestamp
 	struct timespec tspec;
     double event_rate = 0.0;
     double rate_time_start = 0.0;
+    long   subrun_time_start = 0;
     clock_gettime( CLOCK_REALTIME, &tspec );
-	fprintf(fconf,"RUN START : timestamp %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
+	fprintf(fconf,"RUN START : timestamp %ld\n", tspec.tv_sec );
 	fflush(fconf);
-	printf(" RUN START : timestamp %ld.%06lu\n",tspec.tv_sec,tspec.tv_nsec);
-	while(true){
+	printf(" RUN START : timestamp %ld\n", tspec.tv_sec );
+
+    // prepare rate file
+    struct tm daqTime;
+    *localtime_r( &tspec.tv_sec, &daqTime );
+    std::stringstream filenameSS;
+    filenameSS << daqTime.tm_year + 1900;
+    filenameSS << std::setw( 2 ) << std::setfill( '0' ) << daqTime.tm_mon + 1;
+    filenameSS << std::setw( 2 ) << std::setfill( '0' ) << daqTime.tm_mday;
+    std::string rateFilename = "/home/msgc/rate/" + filenameSS.str( );
+
+	FILE* ofile;
+	int trigger_num = 0;
+	int subrun_num = 0;
+    while(true){
 		//file close/open
 		if(trigger_num%sub_entries==0){
 			if(trigger_num != 0){
 				fclose(ofile);
                 clock_gettime( CLOCK_REALTIME, &tspec );
-				fprintf(fconf,"SUBRUN%d END   : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
+                long time_sec  = static_cast< long >( tspec.tv_sec  );
+				fprintf(fconf,"SUBRUN%d END   : timestamp %ld\n", subrun_num, time_sec );
 				fflush(fconf);
-				printf("\nSUBRUN%d END   : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
+				printf("\nSUBRUN%d END   : timestamp %ld\n", subrun_num, time_sec );
 				subrun_num++;
+
+                long realtime_sec = time_sec - subrun_time_start;
+                double subrun_rate = static_cast< double >( sub_entries ) / static_cast< double >( realtime_sec );
+                // save rate
+                std::ofstream rateOfs( rateFilename, std::ios::app );
+                if( rateOfs.is_open( ) == true ) {
+                    *localtime_r( &tspec.tv_sec, &daqTime );
+                    char datetime[128] = {};
+                    strftime( datetime, sizeof( datetime ), "%Y/%m/%d_%H:%M:%S", &daqTime );
+                    rateOfs << datetime << "\t" << subrun_rate << "\n";
+                    rateOfs.close( );
+                }
 			}
 			std::stringstream ss;
 			ss << fname << "_" << subrun_num << ".dat";
 			ofile = fopen(ss.str().c_str(),"w");
             clock_gettime( CLOCK_REALTIME, &tspec );
-			fprintf(fconf,"SUBRUN%d START : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
+            subrun_time_start = tspec.tv_sec;
+			fprintf(fconf,"SUBRUN%d START : timestamp %ld\n", subrun_num, subrun_time_start );
 			fflush(fconf);
-			printf("\nSUBRUN%d START : timestamp %ld.%06lu\n",subrun_num,tspec.tv_sec,tspec.tv_nsec);
+			printf("\nSUBRUN%d START : timestamp %ld\n", subrun_num, subrun_time_start );
 			if(ofile == nullptr){
 				printf("cannot open file .\n");
 				return -1;
