@@ -17,11 +17,11 @@ void DrawWaveformMulti( const String& filenameList, const String& outputDir )
     }
     
     // setup histogram
-    TH2F histWFCh1("histWFCh1","histWFCh1",1024,0,1024,100,-100,100);
-    TH2F histWFCh2("histWFCh2","histWFCh2",1024,0,1024,100,-100,100);
+    TH2F histWFCh1("histWFCh1","histWFCh1",1024,0,1024,1000,-500,500);
+    TH2F histWFCh2("histWFCh2","histWFCh2",1024,0,1024,1000,-500,500);
 
-    TH1F histSpCh1("histSPCh1","histSPCh1",100,0,100);
-    TH1F histSpCh2("histSPCh2","histSPCh2",100,0,100);
+    TH1F histSpCh1("histSPCh1","histSPCh1",1000,0,1000);
+    TH1F histSpCh2("histSPCh2","histSPCh2",1000,0,1000);
     
     int ch1 = 0, ch2 = 0;
     int clock = 0;
@@ -97,7 +97,7 @@ void DrawWaveformMulti( const String& filenameList, const String& outputDir )
     gStyle->SetNumberContours( NCont );
     gPad->SetRightMargin( 0.2 );
 
-    histWFCh1.GetXaxis()->SetTitle("clock [100 MHz sampling]");
+    histWFCh1.GetXaxis()->SetTitle("clock [10MHz sampling]");
     histWFCh1.GetYaxis()->SetTitle("ADC count");
     histWFCh1.GetZaxis()->SetTitle("Entries");
     histWFCh1.Draw("colz");
@@ -109,7 +109,7 @@ void DrawWaveformMulti( const String& filenameList, const String& outputDir )
     gStyle->SetNumberContours( NCont );
     gPad->SetRightMargin( 0.2 );
 
-    histWFCh2.GetXaxis()->SetTitle("clock [100 MHz sampling]");
+    histWFCh2.GetXaxis()->SetTitle("clock [10MHz sampling]");
     histWFCh2.GetYaxis()->SetTitle("ADC count");
     histWFCh2.GetZaxis()->SetTitle("Entries");
     histWFCh2.Draw("colz");
