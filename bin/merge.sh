@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Output file name
-output_file="merge.dat"
+output_file=$1
 
 # initializes
 > "$output_file"
