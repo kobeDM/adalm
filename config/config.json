@@ -1,14 +1,14 @@
 {
     "daq": {
-        "subentries": 1000,
+        "subentries": 500,
         "sampling_rate": 10000000,
         "sampling_num": 1024,
         "dynamic_range": 1,
-        "trigger_Vth_1ch": 0.1,
+        "trigger_Vth_1ch": -0.5,
         "trigger_Vth_2ch": 0.1,
         "trigger_src": 0,
-        "trigger_type": 0,
-        "uri": "1.22.5"
+        "trigger_type": 1,
+        "uri": "1.10.5"
     },
     "ana": {
         "ran_bin": 70,

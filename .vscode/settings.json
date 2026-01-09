@@ -3,5 +3,6 @@
         "*.cmake.in": "\"cmake\"",
         "DrawWaveform.C": "cpp",
         "rootlogon.C": "cpp"
-    }
+    },
+    "cmake.ignoreCMakeListsMissing": true
 }
