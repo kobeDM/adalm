@@ -33,10 +33,6 @@
 
 tmp
 build
-bin/ad_aout
-bin/ad_dout
-bin/ad_out
-bin/daq
-bin/send_bitstream
-set_voltage
-shutter_ctrl
+bin
+.clang-format
+.vscode
