@@ -23,8 +23,8 @@ void makeTree( const std::string &datafile, const std::string &outdirpath )
     const std::string           jsonfile = Form( "%s/config/config.json", soft_path.c_str( ) );
     boost::property_tree::ptree pt;
     read_json( jsonfile, pt );
-    boost::optional<float> thr_ch1_cfg = pt.get_optional<float>( "ana.thr_ch1" );
-    boost::optional<float> thr_ch2_cfg = pt.get_optional<float>( "ana.thr_ch2" );
+    boost::optional<float> thr_ch1_cfg = pt.get_optional<float>( "ana.ch1.thr" );
+    boost::optional<float> thr_ch2_cfg = pt.get_optional<float>( "ana.ch2.thr" );
     const float            thr_ch1     = thr_ch1_cfg.get( );
     const float            thr_ch2     = thr_ch2_cfg.get( );
 

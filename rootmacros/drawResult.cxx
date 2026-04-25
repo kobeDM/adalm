@@ -20,30 +20,24 @@
 
 void drawResult( const std::string &resultdir )
 {
-    SetShStyle( );
-
-    // get ADSW path
-    const char *SOFT_PATH = std::getenv( "ADSW" );
-    std::string soft_path( std::getenv( "ADSW" ) );
-    if ( soft_path.empty( ) ) {
-        std::cout << "ADSW environment variable is not set" << std::endl;
-        return;
-    }
+    SetShStyle( 1 );
 
     // get json data
-    const std::string           jsonfile = Form( "%s/config/config.json", soft_path.c_str( ) );
+    const std::string           jsonfile = Form( "%s/config.json", resultdir.c_str( ) );
     boost::property_tree::ptree pt;
     read_json( jsonfile, pt );
-    boost::optional<int> ran_bin = pt.get_optional<int>( "ana.ran_bin" );
-    boost::optional<int> ran_min = pt.get_optional<int>( "ana.ran_min" );
-    boost::optional<int> ran_max = pt.get_optional<int>( "ana.ran_max" );
-
-    std::string   filename = Form( "%s/cutindex.dat", resultdir.c_str( ) );
-    std::ifstream ifs( filename );
-    if ( ifs.is_open( ) == false ) {
-        std::cout << "failed to open cutindex" << std::endl;
-        return;
-    }
+    int    adc_ch1_bin = pt.get_optional<int>( "ana.ch1.adc_bin" ).get( );
+    double adc_ch1_min = pt.get_optional<double>( "ana.ch1.adc_min" ).get( );
+    double adc_ch1_max = pt.get_optional<double>( "ana.ch1.adc_max" ).get( );
+    int    clk_ch1_bin = pt.get_optional<int>( "ana.ch1.clk_bin" ).get( );
+    int    clk_ch1_min = pt.get_optional<int>( "ana.ch1.clk_min" ).get( );
+    int    clk_ch1_max = pt.get_optional<int>( "ana.ch1.clk_max" ).get( );
+    int    adc_ch2_bin = pt.get_optional<int>( "ana.ch2.adc_bin" ).get( );
+    double adc_ch2_min = pt.get_optional<double>( "ana.ch2.adc_min" ).get( );
+    double adc_ch2_max = pt.get_optional<double>( "ana.ch2.adc_max" ).get( );
+    int    clk_ch2_bin = pt.get_optional<int>( "ana.ch2.clk_bin" ).get( );
+    int    clk_ch2_min = pt.get_optional<int>( "ana.ch2.clk_min" ).get( );
+    int    clk_ch2_max = pt.get_optional<int>( "ana.ch2.clk_max" ).get( );
 
     // open rootfile
     TFile *file = new TFile( Form( "%s/raw.root", resultdir.c_str( ) ) );
@@ -54,26 +48,15 @@ void drawResult( const std::string &resultdir )
     TTree *tree = (TTree *)file->Get( "tree" );
 
     // define ROOT objects
-    TCanvas *cvs   = new TCanvas( "cvs", "cvs", 800, 800 );
-    TCanvas *cvs_c = new TCanvas( "cvs_c", "cvs_c", 1200, 800 );
-    TH2F    *wfdist[2];
-    TH1F    *adcdist1d[2];
-    TH2F    *wfdist_c[2];
-    TH1F    *adcdist1d_c[2];
-    TH2F    *adcdist2d_c[2];
-    TF1     *fit[2];
-    TLegend *tl[2];
-    for ( int i = 0; i < 2; i++ ) {
-        // precut graphs
-        wfdist[i]    = new TH2F( Form( "wfdist%i", i ), Form( "wfdist%i", i ), 1024, 0, 1024, ran_bin.get( ) * 2, ran_max.get( ) * ( -1 ), ran_max.get( ) );
-        adcdist1d[i] = new TH1F( Form( "adcdist1d%i", i ), Form( "adcdist1d%i", i ), ran_bin.get( ), ran_min.get( ), ran_max.get( ) );
-        // cut graphs
-        wfdist_c[i]    = new TH2F( Form( "wfdist_c%i", i ), Form( "wfdist_C%i", i ), 1024, 0, 1024, ran_bin.get( ) * 2, ran_max.get( ) * ( -1 ), ran_max.get( ) );
-        adcdist1d_c[i] = new TH1F( Form( "adcdist1d_c%i", i ), Form( "adcdist1d_c%i", i ), ran_bin.get( ), ran_min.get( ), ran_max.get( ) );
-        adcdist2d_c[i] = new TH2F( Form( "adcdist_c%i", i ), Form( "adcdist_c%i", i ), ran_bin.get( ), ran_min.get( ), ran_max.get( ), 150, -20000, 20000 );
-        fit[i]         = new TF1( Form( "fit%i", i ), "pol1" );
-        tl[i]          = new TLegend( 0.7, 0.8, 0.9, 0.9 );
-    }
+    TCanvas *cvs     = new TCanvas( "cvs", "cvs", 800, 800 );
+    TH2F    *hWfCh1  = new TH2F( "hWfCh1", "hWfCh1", clk_ch1_bin, clk_ch1_min, clk_ch1_max, adc_ch1_bin, adc_ch1_min, adc_ch1_max );
+    TH2F    *hWfCh2  = new TH2F( "hWfCh2", "hWfCh2", clk_ch2_bin, clk_ch2_min, clk_ch2_max, adc_ch2_bin, adc_ch2_min, adc_ch2_max );
+    TH1F    *hAdcCh1 = new TH1F( "hAdcCh1", "hAdcCh1", adc_ch1_bin, adc_ch1_min, adc_ch1_max );
+    TH1F    *hAdcCh2 = new TH1F( "hAdcCh2", "hAdcCh2", adc_ch2_bin, adc_ch2_min, adc_ch2_max );
+    TF1     *fitCh1  = new TF1( "fitCh1", "gaus", adc_ch1_min, adc_ch1_max );
+    TF1     *fitCh2  = new TF1( "fitCh2", "gaus", adc_ch2_min, adc_ch2_max );
+    fitCh1->SetLineColor( kRed );
+    fitCh2->SetLineColor( kRed );
 
     const int clockN        = 1024;
     int       wfCh1[clockN] = { 0 };
@@ -91,98 +74,44 @@ void drawResult( const std::string &resultdir )
     tree->SetBranchAddress( "iadcCh1", &iadcCh1 );
     tree->SetBranchAddress( "iadcCh2", &iadcCh2 );
 
-    int bool1 = 0, bool2 = 0;
-    int count = 0;
-    while ( ifs >> bool1 >> bool2 ) {
-        tree->GetEntry( count );
+    const int nEntries = tree->GetEntries( );
+    std::cout << "nEntries: " << nEntries << std::endl;
+
+    // Fill waveform
+    for ( int i = 0; i < nEntries; i++ ) {
+        tree->GetEntry( i );
         // ch1
         for ( int clock = 0; clock < clockN; clock++ ) {
-            wfdist[0]->Fill( clock, wfCh1[clock] );
-            if ( bool1 == true ) {
-                wfdist_c[0]->Fill( clock, wfCh1[clock] );
-            }
+            hWfCh1->Fill( clock, wfCh1[clock] );
         }
-        adcdist1d[0]->Fill( adcCh1 );
-        if ( bool1 == true ) {
-            adcdist1d_c[0]->Fill( adcCh1 );
-        }
-        adcdist2d_c[0]->Fill( adcCh1, iadcCh1 );
+        hAdcCh1->Fill( adcCh1 );
         // ch2
         for ( int clock = 0; clock < clockN; clock++ ) {
-            wfdist[1]->Fill( clock, wfCh2[clock] );
-            if ( bool2 == true ) {
-                wfdist_c[1]->Fill( clock, wfCh2[clock] );
-            }
+            hWfCh2->Fill( clock, wfCh2[clock] );
         }
-        adcdist1d[1]->Fill( adcCh2 );
-        if ( bool2 == true ) {
-            adcdist1d_c[1]->Fill( adcCh2 );
-        }
-        adcdist2d_c[1]->Fill( adcCh2, iadcCh2 );
-        count++;
+        hAdcCh2->Fill( adcCh2 );
     }
 
     cvs->Divide( 2, 2 );
-    cvs_c->Divide( 3, 2 );
 
-    // for precut
-    // cvs->cd();
-    for ( int i = 0; i < 2; i++ ) {
-        cvs->cd( i * 2 + 1 );
-        adcdist1d[i]->SetStats( 0 );
-        adcdist1d[i]->SetTitle( Form( "ADCdist Ch%i (raw)", i + 1 ) );
-        adcdist1d[i]->GetXaxis( )->SetTitle( "ADC count" );
-        adcdist1d[i]->GetYaxis( )->SetTitle( "Entries" );
-        adcdist1d[i]->Draw( "colz" );
-        cvs->cd( i * 2 + 2 );
-        wfdist[i]->SetStats( 0 );
-        wfdist[i]->SetTitle( Form( "Waveform Ch%i (raw)", i + 1 ) );
-        wfdist[i]->GetXaxis( )->SetTitle( "clock" );
-        wfdist[i]->GetYaxis( )->SetTitle( "ADC" );
-        wfdist[i]->Draw( "colz" );
-    }
-
-    // for cut
-    // cvs_c->cd();
-    const float xx2[4] = { (float)ran_min.get( ), (float)ran_max.get( ), (float)ran_max.get( ), (float)ran_min.get( ) };
-    const int   cutwid = 1000;
-    for ( int i = 0; i < 2; i++ ) {
-        cvs_c->cd( i * 3 + 1 );
-        adcdist1d_c[i]->SetStats( 0 );
-        adcdist1d_c[i]->SetTitle( Form( "ADCdist Ch%i (cut)", i + 1 ) );
-        adcdist1d_c[i]->GetXaxis( )->SetTitle( "ADC count" );
-        adcdist1d_c[i]->GetYaxis( )->SetTitle( "Entries" );
-        adcdist1d_c[i]->Draw( "colz" );
-        cvs_c->cd( i * 3 + 2 );
-        wfdist_c[i]->SetStats( 0 );
-        wfdist_c[i]->SetTitle( Form( "Waveform Ch%i (cut)", i + 1 ) );
-        wfdist_c[i]->GetXaxis( )->SetTitle( "clock" );
-        wfdist_c[i]->GetYaxis( )->SetTitle( "ADC" );
-        wfdist_c[i]->Draw( "colz" );
-        cvs_c->cd( i * 3 + 3 );
-        adcdist2d_c[i]->SetStats( 0 );
-        adcdist2d_c[i]->SetTitle( Form( "ADCdist2D Ch%i (cut)", i + 1 ) );
-        adcdist2d_c[i]->GetXaxis( )->SetTitle( "ADC count" );
-        adcdist2d_c[i]->GetYaxis( )->SetTitle( "total ADC" );
-        adcdist2d_c[i]->Draw( "colz" );
-        adcdist2d_c[i]->Fit( Form( "fit%i", i ), "q" );
-        const float itc2 = fit[i]->GetParameter( 0 );
-        const float slp2 = fit[i]->GetParameter( 1 );
-
-        const float yy2[4] = { slp2 * xx2[0] + itc2 - cutwid, slp2 * xx2[1] + itc2 - cutwid, slp2 * xx2[2] + itc2 + cutwid, slp2 * xx2[3] + itc2 + cutwid };
-        TGraph     *eband2 = new TGraph( 4, xx2, yy2 );
-        eband2->SetFillStyle( 3001 );
-        eband2->SetFillColor( kRed - 9 );
-        eband2->Draw( "SAME F" );
-
-        tl[i]->SetFillStyle( 0 );
-        tl[i]->AddEntry( fit[i], "fit func.", "l" );
-        tl[i]->AddEntry( eband2, "used area", "f" );
-        tl[i]->Draw( );
-    }
+    cvs->cd( 1 );
+    hAdcCh1->GetXaxis( )->SetTitle( "ADC count" );
+    hAdcCh1->GetYaxis( )->SetTitle( "Entries" );
+    hAdcCh1->Draw( "colz" );
+    cvs->cd( 2 );
+    hWfCh1->GetXaxis( )->SetTitle( "clock" );
+    hWfCh1->GetYaxis( )->SetTitle( "ADC" );
+    hWfCh1->Draw( "colz" );
+    cvs->cd( 3 );
+    hAdcCh2->GetXaxis( )->SetTitle( "ADC count" );
+    hAdcCh2->GetYaxis( )->SetTitle( "Entries" );
+    hAdcCh2->Draw( "colz" );
+    cvs->cd( 4 );
+    hWfCh2->GetXaxis( )->SetTitle( "clock" );
+    hWfCh2->GetYaxis( )->SetTitle( "ADC" );
+    hWfCh2->Draw( "colz" );
 
     cvs->SaveAs( Form( "%s/result.png", resultdir.c_str( ) ) );
-    cvs_c->SaveAs( Form( "%s/result_c.png", resultdir.c_str( ) ) );
 
     return;
 }
