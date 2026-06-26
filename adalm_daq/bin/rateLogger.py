@@ -52,10 +52,12 @@ if __name__ == "__main__":
     observer.schedule( event_handler, path, recursive = True )
     observer.start( )
     try:
-        while True:
-            time.sleep( 1 )
+        while observer.is_alive( ):
+            observer.join( 1 )
     except KeyboardInterrupt:
         observer.stop( )
-        
-    observer.join( )
+        observer.join( )
+    finally:
+        observer.stop( )
+        observer.join( )
         
